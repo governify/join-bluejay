@@ -4,28 +4,27 @@
     <title>info.yml validator</title>
     <meta name="mobile-web-app-capable" content="yes">
     <script>
-        var verifiedRepoURL = "";
+        let verifiedRepoURL = '';
         // Check
         function check() {
             resetGeneration();
 
-            var repoURL = document.getElementById("repoURL").value;
+            const repoURL = document.getElementById('repoURL').value;
 
-            if (repoURL === "")
-                return;
+            if (repoURL === '') { return; }
 
-            document.getElementById("result").innerHTML = "<br/>Checking...";
+            document.getElementById('result').innerHTML = '<br/>Checking...';
 
-            console.log("Checking " + repoURL + "!!");
+            console.log('Checking ' + repoURL + '!!');
 
             const data = { repoList: [repoURL] };
 
             fetch('https://scopes.bluejay.governify.io/api/v1/scopes/development/check', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify(data)
             })
                 .then(response => response.json())
                 .then(data => {
@@ -38,57 +37,51 @@
         }
 
         function showResult(result, repoURL) {
-            var resultHTML = "";
+            let resultHTML = '';
             if (result.code === 200 && result.projects.length === 1) {
-                var err = result.projects[0].errors;
+                const err = result.projects[0].errors;
                 if ((err.length === 0)) {
                     resultHTML = "<br/><strong>Yay!! That repo has a valid <span style='color: rgb(41, 126, 255)'>bluejay</span> info.yaml 😊</strong><br/>";
                     verifiedRepoURL = repoURL;
-                    document.getElementById("generationDiv").style.display = 'block';
+                    document.getElementById('generationDiv').style.display = 'block';
                 } else {
-                    resultHTML = "<br/><strong>Ups!! There is a problem! 😔</strong><br/>";
+                    resultHTML = '<br/><strong>Ups!! There is a problem! 😔</strong><br/>';
 
-                    resultHTML += "<br/>Error(s) found:<ul>";
+                    resultHTML += '<br/>Error(s) found:<ul>';
                     err.forEach((e) => {
-                        resultHTML += "<li>" + e + "</li>";
+                        resultHTML += '<li>' + e + '</li>';
                     });
-                    resultHTML += "</ul>";
-
+                    resultHTML += '</ul>';
                 }
-
-
             } else {
-                resultHTML = "<br/>There is a problem with the validator, please contact admin";
-                console.log("Unexpected result from checker:");
+                resultHTML = '<br/>There is a problem with the validator, please contact admin';
+                console.log('Unexpected result from checker:');
                 console.log(JSON.stringify(result, null, 2));
             }
 
-            document.getElementById("result").innerHTML = resultHTML;
+            document.getElementById('result').innerHTML = resultHTML;
 
             return false;
         }
 
-
-
         // Generation
         function generate() {
-            var courseCode = document.getElementById("courseCode").value;
+            const courseCode = document.getElementById('courseCode').value;
 
-            if (courseCode === "" || verifiedRepoURL === "")
-                return;
+            if (courseCode === '' || verifiedRepoURL === '') { return; }
 
-            document.getElementById("generationResult").innerHTML = "<br/>Generating, please wait...";
+            document.getElementById('generationResult').innerHTML = '<br/>Generating, please wait...';
 
-            console.log("Generating " + verifiedRepoURL + " with course code " + courseCode + "!!");
+            console.log('Generating ' + verifiedRepoURL + ' with course code ' + courseCode + '!!');
 
             const data = { courseId: courseCode, repoList: [verifiedRepoURL] };
 
             fetch('https://scopes.bluejay.governify.io/api/v1/scopes/development/generate', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify(data)
             })
                 .then(response => response.json())
                 .then(data => {
@@ -101,74 +94,71 @@
         }
 
         function showGenerationResult(result, courseId) {
-            var resultHTML = "";
-            
+            let resultHTML = '';
+
             if (result.code === 200 && result.projects.length === 1) {
-                var err = result.projects[0].errors;
-                console.log(err)
+                const err = result.projects[0].errors;
+                console.log(err);
                 if (!err || err.length === 0) {
                     // Generated project
                     const projectScope = result.projects[0].newScope;
                     // Get template and prepare it
-                    fetch('https://assets.bluejay.governify.io/api/v1/public/renders/tpa/template.json', {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    })
-                        .then(response => response.json())
+                    console.log('Register - Fetching assets TPA template...');
+                    fetch('https://assets.bluejay.governify.io/api/v1/public/renders/tpa/template.json')
+                        .then(response => response.text())
                         .then(data => {
-                            console.log("Register - TPA template obtained.");
+                            console.log('Register - TPA template obtained.');
+
                             const projectId = projectScope.projectId;
-                            var tpa = JSON.parse(JSON.stringify(data).replace(/1010101010/g, projectId).replace(/2020202020/g, courseId));
+                            const tpa = JSON.parse(data.replace(/1010101010/g, projectId).replace(/2020202020/g, courseId));
                             tpa.context.infrastructure.render = 'https://ui.bluejay.governify.io/render?model=https://registry.bluejay.governify.io/api/v6/agreements/' + tpa.id + '&view=/renders/tpa/default.html&ctrl=/renders/tpa/default.js';
 
                             // Create TPA
                             fetch('https://registry.bluejay.governify.io/api/v6/agreements', {
                                 method: 'POST',
                                 headers: {
-                                    'Content-Type': 'application/json',
+                                    'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify(tpa),
+                                body: JSON.stringify(tpa)
                             })
                                 .then(response => {
-                                    console.log("Register - Agreement created (tpa-" + projectId + ").");
-                                    var periods = { "periods": [{ "from": "2021-01-18T00:00:00Z", "to": new Date().toISOString() }] };
+                                    console.log('Register - Agreement created (tpa-' + projectId + ').');
+                                    const periods = { periods: [{ from: '2021-01-18T00:00:00Z', to: new Date().toISOString() }] };
 
                                     // Compute points
                                     fetch('https://reporter.bluejay.governify.io/api/v4/contracts/tpa-' + projectId + '/createPointsFromPeriods', {
                                         method: 'POST',
                                         headers: {
-                                            'Content-Type': 'application/json',
+                                            'Content-Type': 'application/json'
                                         },
-                                        body: JSON.stringify(periods),
+                                        body: JSON.stringify(periods)
                                     })
-                                        .then(response => console.log("Register - TPA is being computed now."))
+                                        .then(response => console.log('Register - TPA is being computed now.'))
                                         .catch((error) => {
                                             console.error('Error:', error);
                                         });
 
                                     // Start director
                                     const directorRequest = {
-                                        "id": 'tpa-' + projectId,
-                                        "script": "http://assets.$_[SERVICES_PREFIX]$_[DNS_SUFFIX]/api/v1/public/director/test.js",
-                                        "running": true,
-                                        "config": {
-                                            "agreementId": 'tpa-' + projectId
+                                        id: 'tpa-' + projectId,
+                                        script: 'http://assets.$_[SERVICES_PREFIX]$_[DNS_SUFFIX]/api/v1/public/director/test.js',
+                                        running: true,
+                                        config: {
+                                            agreementId: 'tpa-' + projectId
                                         },
-                                        "init": "2021-01-04T00:00:00",
-                                        "interval": 7200000,
-                                        "end": "2021-03-28T00:00:00"
-                                    }
+                                        init: '2021-01-04T00:00:00',
+                                        interval: 7200000,
+                                        end: '2021-03-28T00:00:00'
+                                    };
 
                                     fetch('https://director.bluejay.governify.io/api/v1/tasks', {
                                         method: 'POST',
                                         headers: {
-                                            'Content-Type': 'application/json',
+                                            'Content-Type': 'application/json'
                                         },
-                                        body: JSON.stringify(directorRequest),
+                                        body: JSON.stringify(directorRequest)
                                     })
-                                        .then(response => console.log("Register - Director is setted up and working."))
+                                        .then(response => console.log('Register - Director is setted up and working.'))
                                         .catch((error) => {
                                             console.error('Error:', error);
                                         });
@@ -181,42 +171,38 @@
                             console.error('Error:', error);
                         });
 
-                    var dashboardURL = "http://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-" + projectScope.projectId + "/main";
-                    resultHTML = "<strong>Congrats! Your project dashboard has been created! </strong><br/>";
+                    var dashboardURL = 'http://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                    resultHTML = '<strong>Congrats! Your project dashboard has been created! </strong><br/>';
                     resultHTML += '<span>If this is an empty repo, no data will be shown at the moment. As you start working on it (with P/R, Commit, stories, etc.) the analysis will begin and you can access the dashboard by clicking on the following badge <a href="' + dashboardURL + '" target="_blank"><img src="https://img.shields.io/badge/bluejay-dashboard_"' + projectScope.teamId + '"-blue.svg"></img></a> (credentials: user/bluejay)</span><br/>';
-                    resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/bluejay-dashboard_" + projectScope.teamId + "-blue.svg)](" + dashboardURL + ")</i>"
+                    resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/bluejay-dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
                 } else if (err[0] === 'The is no new changes for this project scope.') {
                     const projectScope = result.projects[0].oldScope;
-                    var dashboardURL = "http://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-" + projectScope.projectId + "/main";
-                    resultHTML = "<strong>Your project is already registered and there are no changes to your info.yml!</strong><br/>";
+                    var dashboardURL = 'http://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                    resultHTML = '<strong>Your project is already registered and there are no changes to your info.yml!</strong><br/>';
                     resultHTML += '<span>If you want to access the dashboard click on the following badge <a href="' + dashboardURL + '" target="_blank"><img src="https://img.shields.io/badge/bluejay-dashboard_"' + projectScope.teamId + '"-blue.svg"></img></a> (credentials: user/bluejay)</span><br/>';
-                    resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/bluejay-dashboard_" + projectScope.teamId + "-blue.svg)](" + dashboardURL + ")</i>"
+                    resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/bluejay-dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
                 } else {
-                    resultHTML = "<br/><strong>Ups!! There is a problem! 😔</strong><br/>";
-                    resultHTML += "<br/>Error(s) found:<ul>";
+                    resultHTML = '<br/><strong>Ups!! There is a problem! 😔</strong><br/>';
+                    resultHTML += '<br/>Error(s) found:<ul>';
                     err.forEach((e) => {
-                        resultHTML += "<li>" + e + "</li>";
+                        resultHTML += '<li>' + e + '</li>';
                     });
-                    resultHTML += "</ul>";
+                    resultHTML += '</ul>';
                 }
-
-
-            } else if(result.code === 403) {
-                resultHTML = "<br/><strong>This course code does not exist 😲! Please enter a valid one.</strong>";
+            } else if (result.code === 403) {
+                resultHTML = '<br/><strong>This course code does not exist 😲! Please enter a valid one.</strong>';
                 console.log("Course code doesn't exist:");
                 console.log(JSON.stringify(result, null, 2));
             } else {
-                resultHTML = "<br/>There is a problem with the generator, please contact admin";
-                console.log("Unexpected result from generator:");
+                resultHTML = '<br/>There is a problem with the generator, please contact admin';
+                console.log('Unexpected result from generator:');
                 console.log(JSON.stringify(result, null, 2));
             }
 
-            document.getElementById("generationResult").innerHTML = resultHTML;
+            document.getElementById('generationResult').innerHTML = resultHTML;
 
             return false;
         }
-
-
 
         // Aux
         function sendclick(event, btn) {
@@ -227,15 +213,15 @@
         }
 
         function resetGeneration() {
-            verifiedRepoURL = "";
-            document.getElementById("generationDiv").style.display = 'none';
-            document.getElementById("generationResult").innerHTML = "";
+            verifiedRepoURL = '';
+            document.getElementById('generationDiv').style.display = 'none';
+            document.getElementById('generationResult').innerHTML = '';
         }
 
-        window.addEventListener("load", function () {
-            console.log("Document loaded!");
-            document.getElementById("repoURL").focus();
-            document.getElementById("result").innerHTML = "<strong>e.g.</strong> https://github.com/governifyauditor/goldenflow-showcase-project"
+        window.addEventListener('load', function () {
+            console.log('Document loaded!');
+            document.getElementById('repoURL').focus();
+            document.getElementById('result').innerHTML = '<strong>e.g.</strong> https://github.com/governifyauditor/goldenflow-showcase-project';
         });
     </script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -244,7 +230,8 @@
 </head>
 
 <body style="font-family: 'Roboto Mono', monospace; background-color: rgb(143, 188, 255);">
-    <div style="height: 91vh; margin: 2%; padding: 3%; background-color: white; border: 1px solid rgb(151, 151, 151);">
+    <div
+        style="min-height: 91vh; margin: 2%; padding: 3%; background-color: white; border: 1px solid rgb(151, 151, 151);">
         <h1 style="width: 100%; text-align: center; padding-bottom: 10px; color: rgb(41, 126, 255);">Bluejay</h1>
         <hr />
         <h4 style="width: 100%; text-align: left; padding: 20px 0 10px 0;">Welcome to the join-in page!</h4>
@@ -264,7 +251,8 @@
         <div style="margin:2%; display: none;" id="generationDiv">
             <hr />
             <h5 style="width: 100%; text-align: left; padding-bottom: 10px; font-size: 1.1rem;"><strong
-                    style="color: rgb(41, 126, 255);">2.</strong> To register your project  in <span style="color: rgb(41, 126, 255);">CS169L</span> course, click on register!</h5>
+                    style="color: rgb(41, 126, 255);">2.</strong> To register your project in <span
+                    style="color: rgb(41, 126, 255);">CS169L</span> course, click on register!</h5>
             <div class="form-inline">
                 <input id="courseCode" class="form-control" style="width:89%; margin-right: 1%;"
                     placeholder="Active courses: CS169L" onkeyup="sendclick(event, 'btnGenerate')">
