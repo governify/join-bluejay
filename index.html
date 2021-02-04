@@ -11,7 +11,7 @@
 
             var repoURL = document.getElementById("repoURL").value;
 
-            if (repoURL == "")
+            if (repoURL === "")
                 return;
 
             document.getElementById("result").innerHTML = "<br/>Checking...";
@@ -78,7 +78,7 @@
         function generate() {
             var courseCode = document.getElementById("courseCode").value;
 
-            if (courseCode == "" || verifiedRepoURL == "")
+            if (courseCode === "" || verifiedRepoURL === "")
                 return;
 
             document.getElementById("generationResult").innerHTML = "<br/>Generating, please wait...";
@@ -107,10 +107,10 @@
         function showGenerationResult(result, courseId) {
             var resultHTML = "";
             
-            if (result.code == 200 && result.projects.length == 1) {
+            if (result.code === 200 && result.projects.length === 1) {
                 var err = result.projects[0].errors;
                 console.log(err)
-                if (!err || err.length == 0) {
+                if (!err || err.length === 0) {
                     // Generated project
                     const projectScope = result.projects[0].newScope;
                     // Get template and prepare it
@@ -205,6 +205,10 @@
                 }
 
 
+            } else if(result.code === 403) {
+                resultHTML = "<br/>This course code does not exist!";
+                console.log("Course code doesn't exist:");
+                console.log(JSON.stringify(result, null, 2));
             } else {
                 resultHTML = "<br/>There is a problem with the generator, please contact admin";
                 console.log("Unexpected result from generator:");
