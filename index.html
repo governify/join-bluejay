@@ -57,10 +57,6 @@
                 }
 
 
-            } else if (result.code === 403) {
-                resultHTML = "<br/>This course does not exist! Please check the course code entered";
-                console.log("Unexpected course code:");
-                console.log(JSON.stringify(result, null, 2));
             } else {
                 resultHTML = "<br/>There is a problem with the validator, please contact admin";
                 console.log("Unexpected result from checker:");
