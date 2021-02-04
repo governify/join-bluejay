@@ -39,9 +39,9 @@
 
         function showResult(result, repoURL) {
             var resultHTML = "";
-            if (result.code == 200 && result.projects.length == 1) {
+            if (result.code === 200 && result.projects.length === 1) {
                 var err = result.projects[0].errors;
-                if ((err.length == 0)) {
+                if ((err.length === 0)) {
                     resultHTML = "<br/><strong>Yay!! That repo has a valid <span style='color: rgb(41, 126, 255)'>bluejay</span> info.yaml 😊</strong><br/>";
                     verifiedRepoURL = repoURL;
                     document.getElementById("generationDiv").style.display = 'block';
@@ -57,6 +57,10 @@
                 }
 
 
+            } else if (result.code === 403) {
+                resultHTML = "<br/>This course does not exist! Please check the course code entered";
+                console.log("Unexpected course code:");
+                console.log(JSON.stringify(result, null, 2));
             } else {
                 resultHTML = "<br/>There is a problem with the validator, please contact admin";
                 console.log("Unexpected result from checker:");
