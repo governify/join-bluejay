@@ -13,7 +13,6 @@ jobs:
   buildTest:
     name: Build and push to dockerhub using develop tag
     if: ${{ github.ref == 'refs/heads/develop' && github.event_name == 'push' }}
-    needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Set up QEMU
