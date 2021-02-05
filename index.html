@@ -104,7 +104,7 @@
                     const projectScope = result.projects[0].newScope;
                     // Get template and prepare it
                     console.log('Register - Fetching assets TPA template...');
-                    fetch('https://assets.bluejay.governify.io/api/v1/public/renders/tpa/template.json')
+                    fetch('https://assets.bluejay.governify.io/api/v1/public/renders/tpa/' + courseId + '.json')
                         .then(response => response.text())
                         .then(data => {
                             console.log('Register - TPA template obtained.');
@@ -251,11 +251,11 @@
         <div style="margin:2%; display: none;" id="generationDiv">
             <hr />
             <h5 style="width: 100%; text-align: left; padding-bottom: 10px; font-size: 1.1rem;"><strong
-                    style="color: rgb(41, 126, 255);">2.</strong> To register your project in <span
-                    style="color: rgb(41, 126, 255);">CS169L</span> course, click on register!</h5>
+                    style="color: rgb(41, 126, 255);">2.</strong> To register your project in a <span
+                    style="color: rgb(41, 126, 255);">course</span>, please enter the code and click on join! F.e: CS169L, testing</h5>
             <div class="form-inline">
                 <input id="courseCode" class="form-control" style="width:89%; margin-right: 1%;"
-                    placeholder="Active courses: CS169L, testing" onkeyup="sendclick(event, 'btnGenerate')">
+                    placeholder="Course Code" onkeyup="sendclick(event, 'btnGenerate')">
                 <button id="btnGenerate" class="btn btn-outline-success" style="width: 10%;" type="submit"
                     onsubmit="generate()" onclick="generate()">Register</button>
             </div>
