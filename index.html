@@ -120,52 +120,60 @@
                                     'Content-Type': 'application/json'
                                 },
                                 body: JSON.stringify(tpa)
-                            })
-                                .then(response => {
-                                    console.log('Register - Agreement created (tpa-' + projectId + ').');
-                                    const periods = { periods: [{ from: '2021-01-18T00:00:00Z', to: new Date().toISOString() }] };
+                            }).then(response => {
+                                console.log('Register - Agreement created (tpa-' + projectId + ').');
+                                const periods = { periods: [{ from: '2021-01-18T00:00:00Z', to: new Date().toISOString() }] };
 
-                                    // Compute points
-                                    fetch('https://reporter.bluejay.governify.io/api/v4/contracts/tpa-' + projectId + '/createPointsFromPeriods', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify(periods)
-                                    })
-                                        .then(response => console.log('Register - TPA is being computed now.'))
-                                        .catch((error) => {
-                                            console.error('Error:', error);
-                                        });
-
-                                    // Start director
-                                    const directorRequest = {
-                                        id: 'tpa-' + projectId,
-                                        script: 'http://assets.$_[SERVICES_PREFIX]$_[DNS_SUFFIX]/api/v1/public/director/' + courseId + '.js',
-                                        running: true,
-                                        config: {
-                                            agreementId: 'tpa-' + projectId
-                                        },
-                                        init: '2021-01-04T00:00:00',
-                                        interval: 7200000,
-                                        end: '2021-03-28T00:00:00'
-                                    };
-
-                                    fetch('https://director.bluejay.governify.io/api/v1/tasks', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify(directorRequest)
-                                    })
-                                        .then(response => console.log('Register - Director is setted up and working.'))
-                                        .catch((error) => {
-                                            console.error('Error:', error);
-                                        });
+                                // Compute points
+                                fetch('https://reporter.bluejay.governify.io/api/v4/contracts/tpa-' + projectId + '/createPointsFromPeriods', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(periods)
                                 })
-                                .catch((error) => {
-                                    console.error('Error:', error);
-                                });
+                                    .then(response => console.log('Register - TPA is being computed now.'))
+                                    .catch((error) => {
+                                        console.error('Error:', error);
+                                    });
+
+                                // Start director
+                                fetch('https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json')
+                                    .then(response => response.text())
+                                    .then(directorData => {
+                                        console.log('Register - TPA template obtained.');
+                                        const directorJSON = JSON.parse(directorData);
+
+                                        const directorRequest = {
+                                            id: 'tpa-' + projectId,
+                                            script: 'http://assets.$_[SERVICES_PREFIX]$_[DNS_SUFFIX]/api/v1/public/director/' + courseId + '.js',
+                                            running: true,
+                                            config: {
+                                                agreementId: 'tpa-' + projectId
+                                            },
+                                            init: directorJSON.init,
+                                            end: directorJSON.end,
+                                            interval: directorJSON.interval
+                                        }
+
+                                        fetch('https://director.bluejay.governify.io/api/v1/tasks', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: JSON.stringify(directorRequest)
+                                        })
+                                            .then(response => console.log('Register - Director is setted up and working.'))
+                                            .catch((error) => {
+                                                console.error('Error:', error);
+                                            });
+                                    }).catch(err => {
+                                        console.log("Error: Failed obtaining director.json computation info.\nURL:", 'https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json\n' + err)
+                                    });
+                            })
+                            .catch((error) => {
+                                console.error('Error:', error);
+                            });
                         })
                         .catch((error) => {
                             console.error('Error:', error);
