@@ -125,7 +125,7 @@
                                 const periods = { periods: [{ from: '2021-01-18T00:00:00Z', to: new Date().toISOString() }] };
 
                                 // Compute points
-                                fetch('https://reporter.bluejay.governify.io/api/v4/contracts/tpa-' + projectId + '/createPointsFromPeriods', {
+                                /*fetch('https://reporter.bluejay.governify.io/api/v4/contracts/tpa-' + projectId + '/createPointsFromPeriods', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json'
@@ -135,7 +135,7 @@
                                     .then(response => console.log('Register - TPA is being computed now.'))
                                     .catch((error) => {
                                         console.error('Error:', error);
-                                    });
+                                    });*/
 
                                 // Start director
                                 fetch('https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json')
