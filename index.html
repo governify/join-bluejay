@@ -130,6 +130,9 @@
                             const tpa = JSON.parse(data.replace(/1010101010/g, projectId).replace(/2020202020/g, courseId));
                             tpa.context.infrastructure.render = 'https://ui.bluejay.governify.io/render?model=https://registry.bluejay.governify.io/api/v6/agreements/' + tpa.id + '&view=/renders/tpa/default.html&ctrl=/renders/tpa/default.js';
 
+                            // Add notifications
+                            tpa.context.definitions.notifications = projectScope.notifications ? projectScope.notifications : {};
+
                             // Create TPA
                             fetch('https://registry.bluejay.governify.io/api/v6/agreements', {
                                 method: 'POST',
