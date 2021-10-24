@@ -27,14 +27,14 @@
             resetGeneration();
 
             const repoURL = document.getElementById('repoURL').value;
-
+            const gitlabCheck = document.getElementById('gitlabCheck').checked;
             if (repoURL === '') { return; }
 
             document.getElementById('result').innerHTML = '<br/>Checking...';
 
             console.log('Checking ' + repoURL + '!!');
 
-            const data = { repoList: [repoURL] };
+            const data = { repoList: [repoURL] ,gitlab:gitlabCheck};
 
             fetch('http://localhost:5700/api/v1/scopes/development/check', {
                 method: 'POST',
@@ -88,10 +88,11 @@
             if (courseCode === '' || verifiedRepoURL === '') { return; }
 
             document.getElementById('generationResult').innerHTML = '<br/>Generating, please wait...';
+            const gitlabCheck = document.getElementById('gitlabCheck').checked;
 
             console.log('Generating ' + verifiedRepoURL + ' with course code ' + courseCode + '!!');
 
-            const data = { courseId: courseCode, repoList: [verifiedRepoURL] };
+            const data = { courseId: courseCode, repoList: [verifiedRepoURL], gitlab:gitlabCheck};
 
             fetch('http://localhost:5700/api/v1/scopes/development/generate', {
                 method: 'POST',
@@ -262,9 +263,13 @@
                     style="color: rgb(41, 126, 255);">1.</strong> Please, enter you Repository URL
                 containing the <span style="color: rgb(41, 126, 255);">info.yml</span> file to check it's validity.</h5>
             <div class="form-inline">
-                <input id="repoURL" class="form-control" style="width:89%; margin-right: 1%;"
+                <input id="repoURL" class="form-control" style="width:77%; margin-right: 1%;"
                     placeholder="Github repo URL" onkeyup="sendclick(event, 'btnCheck')">
-                <button id="btnCheck" class="btn btn-outline-info" style="width: 10%;" type="submit" onsubmit="check()"
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="gitlabCheck">
+                        <label class="custom-control-label" for="gitlabCheck">GitLab Repo</label>
+                    </div>
+                <button id="btnCheck" class="btn btn-outline-info" style="margin-left: 10px; ; width: 10%;" type="submit" onsubmit="check()"
                     onclick="check()">Check</button>
             </div>
             <div id="result" style="padding: 1% 5%;">
