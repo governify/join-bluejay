@@ -181,7 +181,18 @@
                                             },
                                             body: JSON.stringify(directorRequest)
                                         })
-                                            .then(response => console.log('Register - Director is setted up and working.'))
+                                            .then(response =>{ 
+                                                fetch('https://director.bluejay.governify.io/api/v1/tasks/' + directorRequest.id + '/run', {
+                                                    method: 'POST',
+                                                    headers: {
+                                                        'Content-Type': 'application/json'
+                                                    },
+                                                    body: JSON.stringify(directorRequest)
+                                                })
+                                                .then(()=> console.log("Successfully launched first data collect task"))
+                                                .catch(err => console.error('Error:', error))
+                                                console.log('Register - Director is setted up and working.')
+                                            })
                                             .catch((error) => {
                                                 console.error('Error:', error);
                                             });
