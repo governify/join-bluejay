@@ -3,7 +3,11 @@ const http = require('http').createServer(app);
 const port  = process.env.PORT || 5000;
 
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    if (process.env.NODE_ENV === 'production') {
+        res.sendFile(__dirname + '/index.html');
+    } else {
+        res.sendFile(__dirname + '/index-local.html');
+    }
 });
 
 app.get('/badge', (req, res) => {

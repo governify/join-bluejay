@@ -35,7 +35,7 @@
 
             const data = { repoList: [repoURL]};
 
-            fetch('https://scopes.bluejay.governify.io/api/v1/scopes/development/check', {
+            fetch('http://localhost:5700/api/v1/scopes/development/check', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -87,11 +87,12 @@
             if (courseCode === '' || verifiedRepoURL === '') { return; }
 
             document.getElementById('generationResult').innerHTML = '<br/>Generating, please wait...';
+
             console.log('Generating ' + verifiedRepoURL + ' with course code ' + courseCode + '!!');
 
             const data = { courseId: courseCode, repoList: [verifiedRepoURL]};
 
-            fetch('https://scopes.bluejay.governify.io/api/v1/scopes/development/generate', {
+            fetch('http://localhost:5700/api/v1/scopes/development/generate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -119,20 +120,20 @@
                     const projectScope = result.projects[0].newScope;
                     // Get template and prepare it
                     console.log('Register - Fetching assets TPA template...');
-                    fetch('https://assets.bluejay.governify.io/api/v1/public/renders/tpa/' + courseId + '.json')
+                    fetch('http://localhost:5200/api/v1/public/renders/tpa/' + courseId + '.json')
                         .then(response => response.text())
                         .then(data => {
                             console.log('Register - TPA template obtained.');
 
                             const projectId = projectScope.projectId;
                             const tpa = JSON.parse(data.replace(/1010101010/g, projectId).replace(/2020202020/g, courseId));
-                            tpa.context.infrastructure.render = 'https://ui.bluejay.governify.io/render?model=https://registry.bluejay.governify.io/api/v6/agreements/' + tpa.id + '&view=/renders/tpa/default.html&ctrl=/renders/tpa/default.js';
+                            tpa.context.infrastructure.render = 'http://localhost:5100/render?model=http://localhost:5400/api/v6/agreements/' + tpa.id + '&view=/renders/tpa/default.html&ctrl=/renders/tpa/default.js';
 
                             // Add notifications
                             tpa.context.definitions.notifications = projectScope.notifications ? projectScope.notifications : {};
 
                             // Create TPA
-                            fetch('https://registry.bluejay.governify.io/api/v6/agreements', {
+                            fetch('http://localhost:5400/api/v6/agreements', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -142,21 +143,8 @@
                                 console.log('Register - Agreement created (tpa-' + projectId + ').');
                                 const periods = { periods: [{ from: '2021-01-18T00:00:00Z', to: new Date().toISOString() }] };
 
-                                // Compute points
-                                /*fetch('https://reporter.bluejay.governify.io/api/v4/contracts/tpa-' + projectId + '/createPointsFromPeriods', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify(periods)
-                                })
-                                    .then(response => console.log('Register - TPA is being computed now.'))
-                                    .catch((error) => {
-                                        console.error('Error:', error);
-                                    });*/
-
                                 // Start director
-                                fetch('https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json')
+                                fetch('http://localhost:5200/api/v1/public/director/' + courseId + '.json')
                                     .then(response => response.text())
                                     .then(directorData => {
                                         console.log('Register - TPA template obtained.');
@@ -164,7 +152,7 @@
 
                                         const directorRequest = {
                                             id: 'tpa-' + projectId,
-                                            script: 'http://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.js',
+                                            script: 'http://localhost:5200/api/v1/public/director/' + courseId + '.js',
                                             running: true,
                                             config: {
                                                 agreementId: 'tpa-' + projectId
@@ -174,15 +162,15 @@
                                             interval: directorJSON.interval
                                         }
 
-                                        fetch('https://director.bluejay.governify.io/api/v1/tasks', {
+                                        fetch('http://localhost:5800/api/v1/tasks', {
                                             method: 'POST',
                                             headers: {
                                                 'Content-Type': 'application/json'
                                             },
                                             body: JSON.stringify(directorRequest)
                                         })
-                                            .then(response =>{ 
-                                                fetch('https://director.bluejay.governify.io/api/v1/tasks/' + directorRequest.id + '/run', {
+                                        .then(response =>{ 
+                                                fetch('http://localhost:5800/api/v1/tasks/' + directorRequest.id + '/run', {
                                                     method: 'POST',
                                                     headers: {
                                                         'Content-Type': 'application/json'
@@ -197,7 +185,7 @@
                                                 console.error('Error:', error);
                                             });
                                     }).catch(err => {
-                                        console.log("Error: Failed obtaining director.json computation info.\nURL:", 'https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json\n' + err)
+                                        console.log("Error: Failed obtaining director.json computation info.\nURL:", 'http://localhost:5200/api/v1/public/director/' + courseId + '.json\n' + err)
                                     });
                             })
                                 .catch((error) => {
@@ -210,7 +198,7 @@
                     if (blindCourses.includes(courseId)) {
                         resultHTML = '<strong>Congrats! Your project has successfully joined Bluejay! </strong><br/>';
                     } else {
-                        var dashboardURL = 'http://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                        var dashboardURL = 'http://localhost:5600/dashboard/script/dashboardLoader.js?dashboardURL=http://localhost:5300/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
                         resultHTML = '<strong>Congrats! Your project dashboard has been created! </strong><br/>';
                         resultHTML += '<span>If this is an empty repo, no data will be shown at the moment. As you start working on it (with P/R, Commit, stories, etc.) the analysis will begin and you can access the dashboard by clicking on the following badge <a href="' + dashboardURL + '" target="_blank"><img src="https://img.shields.io/badge/Bluejay-Dashboard_"' + projectScope.teamId + '"-blue.svg"></img></a> (credentials: user/bluejay)</span><br/>';
                         resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-Dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
@@ -220,7 +208,7 @@
                     if (blindCourses.includes(courseId)) {
                         resultHTML = '<strong>Your project had already properly joined to bluejay! </strong><br/>';
                     } else {
-                        var dashboardURL = 'http://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                        var dashboardURL = 'http://localhost:5600/dashboard/script/dashboardLoader.js?dashboardURL=http://localhost:5300/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
                         resultHTML = '<strong>Your project is already registered and there are no changes to your info.yml!</strong><br/>';
                         resultHTML += '<span>If you want to access the dashboard click on the following badge <a href="' + dashboardURL + '" target="_blank"><img src="https://img.shields.io/badge/Bluejay-Dashboard_"' + projectScope.teamId + '"-blue.svg"></img></a> (credentials: user/bluejay)</span><br/>';
                         resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-Dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
