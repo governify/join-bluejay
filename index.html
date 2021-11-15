@@ -26,7 +26,7 @@
         function check() {
             resetGeneration();
 
-            const repoURL = document.getElementById('repoURL').value;
+            const repoURL = document.getElementById('repoURL').value.trim();
             if (repoURL === '') { return; }
 
             document.getElementById('result').innerHTML = '<br/>Checking...';
