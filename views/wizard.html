@@ -1,0 +1,457 @@
+<html>
+
+<head>
+    <title>info.yml wizard</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        .mb-3 {
+            margin-bottom: 5px !important;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/yamljs/0.3.0/yaml.min.js"
+        integrity="sha512-f/K0Q5lZ1SrdNdjc2BO2I5kTx8E5Uw1EU3PhSUB9fYPohap5rPWEmQRCjtpDxNmQB4/+MMI/Cf+nvh1VSiwrTA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body style="font-family: 'Roboto Mono', monospace; background-color: rgb(143, 188, 255);">
+    <div
+        style="min-height: 91vh; margin: 2%; padding: 2%; background-color: white; border: 1px solid rgb(151, 151, 151);">
+        <h1 style="width: 100%; text-align: center; padding-bottom: 10px; color: rgb(41, 126, 255);">Info.yml Wizard
+        </h1>
+        <hr style="margin: 0 0 30px 0;" />
+        <div style="display: grid;grid-template-columns: 1.5fr 1fr;min-height: 69%;">
+            <div class="form" style="height: 100%; padding: 0 30px 0 0; font-size: 15;">
+                <div class="mb-3 row">
+                    <label for="name" class="col-sm-3 col-form-label">Name</label>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control form-control-sm" id="name">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="owner" class="col-sm-3 col-form-label">Owner</label>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control form-control-sm" id="owner">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="teamId" class="col-sm-3 col-form-label">TeamId</label>
+                    <div class="col-sm-5">
+                        <input type="text" class="form-control form-control-sm" id="teamId">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="identities" class="col-sm-2 col-form-label">Identities:</label>
+                </div>
+                <div id="identities" style="margin-left: 20px;">
+
+                </div>
+                <div class="mb-3 row">
+                    <label for="notifications" class="col-sm-2 col-form-label">Notifications:</label>
+                </div>
+                <div id="notifications" style="margin-left: 20px;">
+                </div>
+
+                <div class="mb-3 row">
+                    <label for="members" class="col-sm-3 col-form-label">Members:</label>
+                </div>
+                <div id="members" style="margin-left: 20px;">
+                </div>
+                <hr style="margin: 20px 0 30px 0;" />
+                <div class="mb-3 row">
+                    <div class="col-sm-5">
+                        <div class="row">
+                            <label for="name" class="col-sm-2 form-label">Name:</label>
+                            <div class="col-sm-10"><input type="text" class="form-control form-control-sm" id="newName">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="row">
+                            <label for="name" class="col-sm-3 form-label">Surname:</label>
+                            <div class="col-sm-9"><input type="text" class="form-control form-control-sm"
+                                    id="newSurname"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" id="addMember" class="btn btn-primary btn-sm">Add Member</button>
+                    </div>
+                </div>
+                <div class="mb-3 row" style="margin-top: 40px;">
+                    <div class="col-sm-2">
+                        <select id="selectPrimary" class="form-select form-select-sm"
+                            aria-label=".form-select-sm example">
+
+                        </select>
+                    </div>
+                    <div class="col-sm-2">
+                        <select id="selectSecondary" class="form-select form-select-sm"
+                            aria-label=".form-select-sm example">
+
+                        </select>
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control form-control-sm" id="fieldValue">
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="crypted">
+                            <label class="form-check-label" for="flexCheckDefault">
+                                Crypted
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="button" id="addField" class="btn btn-primary btn-sm">Add Field</button>
+                    </div>
+                </div>
+            </div>
+            <div style="position:relative;height: 100%;padding: 10px;border: black 1px solid;">
+                <p style="white-space: pre; max-width: 676px; overflow-x: scroll; padding-bottom: 15px;" id="yml">
+                </p>
+                <div style="position:absolute; bottom: 0; right: 0; margin:10px">
+                    <button type="button" class="btn btn-outline-primary mb-3" data-bs-toggle="modal"
+                        data-bs-target="#exampleModal">
+                        Load
+                    </button>
+                    <button class="btn btn-outline-primary mb-3" id="download">
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Load yml from GitHub</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input class="form-control" type="text" placeholder="GitHub Repo url"
+                            aria-label="default input example" id="ymlinput">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="loadyml">Load yml</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let infoJson = {
+            "name": "Golden Flow Showcase Project",
+            "owner": "governify",
+            "teamId": "123",
+            "identities": {
+                "pivotal": "https://www.pivotaltracker.com/n/projects/2487566",
+                "heroku": "https://testing-goldenflow.herokuapp.com/"
+            },
+            "notifications": {
+                "slack_enc": "U2FsdGVkX19pq6yONVmlzEwhejDpfz1Gy8l1CwToo/6E9/1hqDOk/Y7YjIwkmCJkewoQ+6sYBWsXnVTM6G4O1wD8CNlwPgXDSl+F5Q54esStdToEbgpe5pnflulJNmu7fcTPJv2fLJ5bZx6iiDfXLw=="
+            },
+            "members": {
+                "member1": {
+                    "name": "Governify",
+                    "surname": "Auditor",
+                    "githubUsername": "governifyauditor",
+                    "pivotalUsername": "governifyauditor",
+                    "herokuEmail": "governify.auditor@gmail.com"
+                }
+            }
+        }
+
+        const selectsOptionsBase = {
+            "identities": ['pivotal', 'heroku'],
+            "notifications": ['slack']
+        }
+
+        let selectsOptions = { ...selectsOptionsBase }
+
+        let ymlText
+
+        const generateYml = () => {
+            ymlText = YAML.stringify({project:infoJson}, 5, 2);
+            const yml = document.getElementById('yml');
+            yml.textContent = ymlText.replace(/\n/g, "\r\n");
+        }
+
+        const loadPrimaryOptions = () => {
+            let selectPrimary = document.getElementById('selectPrimary');
+            let html = ''
+            Object.keys(selectsOptions).forEach((key, index) => {
+                if (index === 0) loadSecondaryOptions(key)
+                html += `<option value="${key}">${key}</option>`
+            })
+            selectPrimary.innerHTML = html;
+        }
+
+        const loadSecondaryOptions = (primary) => {
+            let selectSecondary = document.getElementById('selectSecondary');
+            let html = ''
+            selectsOptions[primary].forEach(key => {
+                html += `<option value="${key}">${key}</option>`
+            })
+            selectSecondary.innerHTML = html;
+        }
+
+        const loadIdentities = () => {
+            let identities = document.getElementById('identities');
+            let html = ''
+            Object.entries(infoJson.identities).forEach(element => {
+                let temp =
+                    `
+                <div class="mb-3 row">
+                    <div class="col-sm-3">
+                        <input type="text" readonly class="form-control form-control-sm" value="${element[0]}">
+                    </div>
+                    <div class="col-sm-7">
+                        <input type="text" readonly class="form-control form-control-sm"
+                            value="${element[1]}">
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" id="${element[0]}" class="btn btn-sm btn-outline-danger mb-3 idenButton">Delete</button>
+                    </div>
+                </div>
+                `;
+                html += temp
+            })
+            identities.innerHTML = html
+            let buttons = document.querySelectorAll('#identities .idenButton');
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener("click", function (event) {
+                    delete infoJson.identities[event.target.id]
+                    loadIdentities()
+                });
+            }
+            generateYml()
+        }
+
+        const loadNotifications = () => {
+            let notifications = document.getElementById('notifications');
+            let html = ''
+            Object.entries(infoJson.notifications).forEach(element => {
+                let temp =
+                    `
+                <div class="mb-3 row">
+                    <div class="col-sm-3">
+                        <input type="text" readonly class="form-control form-control-sm" value="${element[0]}">
+                    </div>
+                    <div class="col-sm-7">
+                        <input type="text" readonly class="form-control form-control-sm"
+                            value="${element[1]}">
+                    </div>
+                    <div class="col-sm-2">
+                        <button type="submit" id="${element[0]}" class="btn btn-sm btn-outline-danger mb-3 idenButton">Delete</button>
+                    </div>
+                </div>
+                `;
+                html += temp
+            })
+            notifications.innerHTML = html
+            let buttons = document.querySelectorAll('#notifications .idenButton');
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener("click", function (event) {
+                    delete infoJson.notifications[event.target.id]
+                    loadNotifications()
+                });
+            }
+            generateYml()
+        }
+
+        const loadMembers = () => {
+            let members = document.getElementById('members');
+            let html = ''
+            selectsOptions = { ...selectsOptionsBase }
+            Object.entries(infoJson.members).forEach(element => {
+                selectsOptions[`Members > ${element[0]}`] = ['githubUsername', 'pivotalUsername', 'herokuEmail']
+                let temp =
+                    `
+                    <div class="mb-3 row">
+                        <label class="col-sm-3 col-form-label">${element[0]}:</label>
+                        <div class="col-sm-7"></div>
+                        <div class="col-sm-2">
+                            <button id="${element[0]}" type="submit" class="btn btn-sm btn-outline-danger mb-3 idenButton">Delete</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row" style="margin-left: 20px;">
+                        <div class="col-sm-4">
+                            <div class="row">
+                                <label for="name" class="col-sm-2 form-label">Name:</label>
+                                <div class="col-sm-10"><input type="text" readonly class="form-control form-control-sm" id="name" value="${element[1].name}"></div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="row">
+                                <label for="name" class="col-sm-3 form-label">Surname:</label>
+                                <div class="col-sm-9"><input type="text" readonly class="form-control form-control-sm" id="name" value="${element[1].surname}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 row" style="margin-left: 20px;">
+                        
+                `;
+                Object.entries(element[1]).splice(2).forEach(elementAtribute => {
+                    temp +=
+                        `
+                    <div class="col-sm-4">
+                        <label for="herokuEmail" class="form-label">${elementAtribute[0]}:</label>
+                        <input type="text" readonly="" class="form-control form-control-sm" id="herokuEmail" value="${elementAtribute[1]}">
+                    </div>
+                    `
+                })
+                temp += '</div>'
+                html += temp
+            })
+            loadPrimaryOptions()
+            members.innerHTML = html
+            let buttons = document.querySelectorAll('#members .idenButton');
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].addEventListener("click", function (event) {
+                    delete infoJson.members[event.target.id]
+                    let on = false
+                    Object.keys(infoJson.members).forEach((key, index) => {
+                        if (index + 1 >= event.target.id.replace('member', '')) delete Object.assign(infoJson.members, { [`member${index + 1}`]: infoJson.members[key] })[key];
+                    })
+                    loadMembers()
+                });
+            }
+            generateYml()
+        }
+
+        const checkNewMember = (name, surname) => {
+            return name?.length > 3 && surname?.length > 3
+        }
+
+        const encrypt = async (text) => {
+            let result
+
+            await axios.get("/encrypt?" + new URLSearchParams({ text }))
+                .then(res => result = res.data)
+                .catch(error => console.error)
+
+            return result
+        }
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById('name').value = infoJson.name;
+            document.getElementById('owner').value = infoJson.owner;
+            document.getElementById('teamId').value = infoJson.teamId;
+            loadIdentities()
+            loadNotifications()
+            loadMembers()
+            generateYml()
+            loadPrimaryOptions()
+        });
+
+        function download(filename, text) {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+
+        const name = document.getElementById('name')
+        name.addEventListener('change', (event) => {
+            infoJson.name = event.target.value
+            generateYml()
+        })
+
+        const owner = document.getElementById('owner')
+        owner.addEventListener('change', (event) => {
+            infoJson.owner = event.target.value
+            generateYml()
+        })
+
+        const teamid = document.getElementById('teamId')
+        teamid.addEventListener('change', (event) => {
+            infoJson.teamId = event.target.value
+            generateYml()
+        })
+
+        const selectPrimary = document.getElementById('selectPrimary')
+        selectPrimary.addEventListener('change', (event) => {
+            loadSecondaryOptions(event.target.value)
+        })
+
+        const addMember = document.getElementById('addMember')
+        addMember.addEventListener('click', () => {
+            let newName = document.getElementById('newName').value
+            let newSurname = document.getElementById('newSurname').value
+
+            if (checkNewMember(newName, newSurname)) {
+                let memberTag = 'member' + (Object.keys(infoJson.members).length + 1)
+                infoJson.members[memberTag] = { name: newName, surname: newSurname }
+                loadMembers()
+            }
+        })
+
+        const addField = document.getElementById('addField')
+        addField.addEventListener('click', async () => {
+            let selectPrimary = document.getElementById('selectPrimary').value
+            let selectSecondary = document.getElementById('selectSecondary').value
+            let fieldValue = document.getElementById('fieldValue').value
+            let crypted = document.getElementById('crypted').checked
+
+            let infoJsonAtribute = infoJson[selectPrimary]
+
+            if (selectPrimary.includes('Members')) infoJsonAtribute = infoJson['members'][selectPrimary.replace('Members > ', '')];
+
+            if (crypted) {
+                selectSecondary = selectSecondary + '_enc';
+                fieldValue = await encrypt(fieldValue)
+            }
+
+            infoJsonAtribute[selectSecondary] = fieldValue;
+
+            loadIdentities()
+            loadNotifications()
+            loadMembers()
+            generateYml()
+        })
+
+        const downloads = document.getElementById('download')
+        downloads.addEventListener('click', () => {
+            download('info.yml', ymlText)
+        })
+
+        //get loadyml
+        const loadyml = document.getElementById('loadyml')
+        loadyml.addEventListener('click', async() => {
+            let input = document.getElementById('ymlinput').value;
+            let githubOwner, githubRepo;
+
+            githubOwner = input.split('github.com/')[1].split('/')[0];
+            githubRepo = input.split('github.com/')[1].split('/')[1];
+
+            let nativeObject
+            await axios.get('/getYml?' + new URLSearchParams({ githubOwner,githubRepo }))
+                .then(res => nativeObject = YAML.parse(res.data))
+                .catch(error => console.log(error))
+            infoJson = nativeObject.project
+            
+            loadIdentities()
+            loadNotifications()
+            loadMembers()
+            generateYml()
+            loadPrimaryOptions()
+        })
+
+    </script>
+</body>
