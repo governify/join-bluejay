@@ -1,3 +1,12 @@
+## [1.2.1](https://github.com/governify/join-bluejay/compare/v1.2.0...v1.2.1) (2022-01-26)
+
+
+### Bug Fixes
+
+* Name, Owner, TeamId fields not changing when load ([851d8ef](https://github.com/governify/join-bluejay/commit/851d8ef16ea0323f48aae32d301fc1004a345345))
+
+
+
 # [1.2.0](https://github.com/governify/join-bluejay/compare/v1.1.1...v1.2.0) (2022-01-26)
 
 

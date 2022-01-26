@@ -1,6 +1,6 @@
 {
   "name": "info-validator",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "info.yaml validator UI based on governify scope validator",
   "main": "index.js",
   "scripts": {
