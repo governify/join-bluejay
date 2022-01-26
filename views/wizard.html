@@ -445,6 +445,10 @@
                 .then(res => nativeObject = YAML.parse(res.data))
                 .catch(error => console.log(error))
             infoJson = nativeObject.project
+
+            name.value = infoJson.name
+            owner.value = infoJson.owner
+            teamid.value = infoJson.teamId
             
             loadIdentities()
             loadNotifications()
