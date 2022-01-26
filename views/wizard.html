@@ -30,25 +30,25 @@
         <div style="display: grid;grid-template-columns: 1.5fr 1fr;min-height: 69%;">
             <div class="form" style="height: 100%; padding: 0 30px 0 0; font-size: 15;">
                 <div class="mb-3 row">
-                    <label for="name" class="col-sm-3 col-form-label">Name</label>
+                    <label for="name" class="col-sm-3 col-form-label">Name*:</label>
                     <div class="col-sm-5">
                         <input type="text" class="form-control form-control-sm" id="name">
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label for="owner" class="col-sm-3 col-form-label">Owner</label>
+                    <label for="owner" class="col-sm-3 col-form-label">Owner*:</label>
                     <div class="col-sm-5">
                         <input type="text" class="form-control form-control-sm" id="owner">
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label for="teamId" class="col-sm-3 col-form-label">TeamId</label>
+                    <label for="teamId" class="col-sm-3 col-form-label">TeamId*:</label>
                     <div class="col-sm-5">
                         <input type="text" class="form-control form-control-sm" id="teamId">
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label for="identities" class="col-sm-2 col-form-label">Identities:</label>
+                    <label for="identities" class="col-sm-2 col-form-label">Identities*:</label>
                 </div>
                 <div id="identities" style="margin-left: 20px;">
 
@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label for="members" class="col-sm-3 col-form-label">Members:</label>
+                    <label for="members" class="col-sm-3 col-form-label">Members(At least 1)*:</label>
                 </div>
                 <div id="members" style="margin-left: 20px;">
                 </div>
@@ -112,6 +112,14 @@
                         <button type="button" id="addField" class="btn btn-primary btn-sm">Add Field</button>
                     </div>
                 </div>
+                <div class="mb-3 row" style="margin-top: 40px;">
+                    <div class="col-sm-4">
+                        <p>*Mandatory fields</p>
+                    </div>
+                    <div class="col-sm-4">
+                        <button type="button" id="example" class="btn btn-outline-info">Click here to see a minimal example</button>
+                    </div>
+                </div>
             </div>
             <div style="position:relative;height: 100%;padding: 10px;border: black 1px solid;">
                 <p style="white-space: pre; max-width: 676px; overflow-x: scroll; padding-bottom: 15px;" id="yml">
@@ -149,24 +157,14 @@
     </div>
     <script>
         let infoJson = {
-            "name": "Golden Flow Showcase Project",
-            "owner": "governify",
-            "teamId": "123",
+            "name": "",
+            "owner": "",
+            "teamId": "",
             "identities": {
-                "pivotal": "https://www.pivotaltracker.com/n/projects/2487566",
-                "heroku": "https://testing-goldenflow.herokuapp.com/"
             },
             "notifications": {
-                "slack_enc": "U2FsdGVkX19pq6yONVmlzEwhejDpfz1Gy8l1CwToo/6E9/1hqDOk/Y7YjIwkmCJkewoQ+6sYBWsXnVTM6G4O1wD8CNlwPgXDSl+F5Q54esStdToEbgpe5pnflulJNmu7fcTPJv2fLJ5bZx6iiDfXLw=="
             },
             "members": {
-                "member1": {
-                    "name": "Governify",
-                    "surname": "Auditor",
-                    "githubUsername": "governifyauditor",
-                    "pivotalUsername": "governifyauditor",
-                    "herokuEmail": "governify.auditor@gmail.com"
-                }
             }
         }
 
@@ -431,7 +429,11 @@
             download('info.yml', ymlText)
         })
 
-        //get loadyml
+        const example = document.getElementById('example')
+        example.addEventListener('click', () => {
+            window.location = 'https://github.com/governifyauditor/goldenflow-showcase-project/blob/main/info.yml'
+        })
+
         const loadyml = document.getElementById('loadyml')
         loadyml.addEventListener('click', async() => {
             let input = document.getElementById('ymlinput').value;
