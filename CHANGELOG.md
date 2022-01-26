@@ -1,4 +1,13 @@
-# 1.1.0 (2021-10-28)
+## [1.1.1](https://github.com/governify/join-bluejay/compare/v1.1.0...v1.1.1) (2021-11-15)
+
+
+### Bug Fixes
+
+* repoUrl trim ([0a85714](https://github.com/governify/join-bluejay/commit/0a85714dc3f12f9ab2ef13e55f2cfae49b9bf203))
+
+
+
+# [1.1.0](https://github.com/governify/join-bluejay/compare/f345c3299722f343790ccedab6ca5bdd90c1106f...v1.1.0) (2021-10-28)
 
 
 ### Bug Fixes
