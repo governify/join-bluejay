@@ -1,3 +1,12 @@
+# [1.2.0](https://github.com/governify/join-bluejay/compare/v1.1.1...v1.2.0) (2022-01-26)
+
+
+### Features
+
+* Info Wizard ([16e9082](https://github.com/governify/join-bluejay/commit/16e908279f0808724ecbe29dbf6c670d13984a47))
+
+
+
 ## [1.1.1](https://github.com/governify/join-bluejay/compare/v1.1.0...v1.1.1) (2021-11-15)
 
 
