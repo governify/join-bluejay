@@ -117,7 +117,8 @@
                         <p>*Mandatory fields</p>
                     </div>
                     <div class="col-sm-4">
-                        <button type="button" id="example" class="btn btn-outline-info">Click here to see a minimal example</button>
+                        <button type="button" id="example" class="btn btn-outline-info">Click here to see a minimal
+                            example</button>
                     </div>
                 </div>
             </div>
@@ -149,7 +150,27 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="loadyml">Load yml</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="loadyml">Load
+                            yml</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header" >
+                        <h5 class="modal-title" id="downloadModalLabel">Download yml</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" >
+                        <ul id="downloadModalBody">
+
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
@@ -178,7 +199,7 @@
         let ymlText
 
         const generateYml = () => {
-            ymlText = YAML.stringify({project:infoJson}, 5, 2);
+            ymlText = YAML.stringify({ project: infoJson }, 5, 2);
             const yml = document.getElementById('yml');
             yml.textContent = ymlText.replace(/\n/g, "\r\n");
         }
@@ -425,8 +446,39 @@
         })
 
         const downloads = document.getElementById('download')
-        downloads.addEventListener('click', () => {
-            download('info.yml', ymlText)
+        downloads.addEventListener('click', async () => {
+            await axios.post("http://localhost:5700/api/v1/scopes/development/check", { name: 'Wizard', data: ymlText })
+                .then(res => {
+                    console.log(res.data.projects[0].errors)
+                    var downloadModal = new bootstrap.Modal(document.getElementById('downloadModal'), {
+                        keyboard: false
+                    })
+                    downloadModal.toggle()
+
+                    var downloadModalBody = document.getElementById('downloadModalBody')
+                    res.data.projects[0].errors.forEach(error => {
+                        downloadModalBody.innerHTML += `
+                        <li>
+                            <p>${error}</p>
+                        </li>
+                        `
+                    })
+
+                    var myModalEl = document.getElementById('downloadModal')
+                    myModalEl.addEventListener('hidden.bs.modal', function (event) {
+                        downloadModalBody.innerHTML = ''
+                    })
+
+                    if(res.data.projects[0].errors.length == 0) {
+                        downloadModalBody.innerHTML += `
+                        <li>
+                            <p>Todo correcto</p>
+                        </li>
+                        `
+                        download(`info.yml`, ymlText)
+                    }
+                })
+                .catch(error => console.error)
         })
 
         const example = document.getElementById('example')
@@ -435,7 +487,7 @@
         })
 
         const loadyml = document.getElementById('loadyml')
-        loadyml.addEventListener('click', async() => {
+        loadyml.addEventListener('click', async () => {
             let input = document.getElementById('ymlinput').value;
             let githubOwner, githubRepo;
 
@@ -443,7 +495,7 @@
             githubRepo = input.split('github.com/')[1].split('/')[1];
 
             let nativeObject
-            await axios.get('/getYml?' + new URLSearchParams({ githubOwner,githubRepo }))
+            await axios.get('/getYml?' + new URLSearchParams({ githubOwner, githubRepo }))
                 .then(res => nativeObject = YAML.parse(res.data))
                 .catch(error => console.log(error))
             infoJson = nativeObject.project
@@ -451,7 +503,7 @@
             name.value = infoJson.name
             owner.value = infoJson.owner
             teamid.value = infoJson.teamId
-            
+
             loadIdentities()
             loadNotifications()
             loadMembers()
