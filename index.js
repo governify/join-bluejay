@@ -19,7 +19,7 @@ app.get('/wizard', (req, res) => {
     res.sendFile(__dirname + '/views/wizard.html');
 });
 
-app.get('/encripted_field_check', (req, res) => {
+app.get('/checker', (req, res) => {
     res.sendFile(__dirname + '/views/checker.html');
 });
 
