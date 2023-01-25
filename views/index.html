@@ -265,7 +265,6 @@
         window.addEventListener('load', function () {
             console.log('Document loaded!');
             document.getElementById('repoURL').focus();
-            document.getElementById('result').innerHTML = '<strong>e.g.</strong> https://github.com/governifyauditor/goldenflow-showcase-project';
         });
     </script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
@@ -281,14 +280,16 @@
         <h4 style="width: 100%; text-align: left; padding: 20px 0 10px 0;">Welcome to the join-in page!</h4>
         <div style="margin:2%">
             <h5 style="width: 100%; text-align: left; padding-bottom: 10px; font-size: 1.1rem;"><strong
-                    style="color: rgb(41, 126, 255);">1.</strong> Please, enter you Repository URL
-                containing the <span style="color: rgb(41, 126, 255);">info.yml</span> file to check it's validity.</h5>
-            <div class="form-inline">
+                    style="color: rgb(41, 126, 255);">1.</strong> Please, enter you GitHub or GitLab Repository URL
+                containing the <a href="https://github.com/governifyauditor/goldenflow-showcase-project/blob/main/info.yml"><span style="color: rgb(41, 126, 255);">info.yml</span></a> file to check it's validity.</h5>
+                <div class="form-inline">
                 <input id="repoURL" class="form-control" style="width:89%; margin-right: 1%;"
-                    placeholder="GitHub or GitLab repo URL" onkeyup="sendclick(event, 'btnCheck')">
+                    placeholder="https://github.com/governifyauditor/goldenflow-showcase-project" onkeyup="sendclick(event, 'btnCheck')">
                 <button id="btnCheck" class="btn btn-outline-info" style="width: 10%;" type="submit" onsubmit="check()"
                     onclick="check()">Check</button>
             </div>
+            <p style="padding: 10px 5px;">Don't have an <b>info.yaml</b> file? <a href="/wizard">Create one now!</a></p>
+
             <div id="result" style="padding: 1% 5%;">
             </div>
         </div>
