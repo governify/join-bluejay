@@ -1,3 +1,13 @@
+# [1.3.0](https://github.com/governify/join-bluejay/compare/v1.2.2...v1.3.0) (2022-02-01)
+
+
+### Features
+
+* Checker ([f09f522](https://github.com/governify/join-bluejay/commit/f09f52289d10023914373da02303ec2ae94c8d8f))
+* Checker info yaml before download ([4e9864f](https://github.com/governify/join-bluejay/commit/4e9864f2bae79c2bf44a271ab6cdf722cb7f01ef))
+
+
+
 ## [1.2.2](https://github.com/governify/join-bluejay/compare/v1.2.1...v1.2.2) (2022-01-26)
 
 
