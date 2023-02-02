@@ -1,3 +1,12 @@
+# [1.4.0](https://github.com/governify/join-bluejay/compare/v1.3.0...v1.4.0) (2023-02-02)
+
+
+### Features
+
+* Added link to wizard ([9c861a0](https://github.com/governify/join-bluejay/commit/9c861a0e116f41eba5a2e555ee0dfea81248c47e))
+
+
+
 # [1.3.0](https://github.com/governify/join-bluejay/compare/v1.2.2...v1.3.0) (2022-02-01)
 
 
