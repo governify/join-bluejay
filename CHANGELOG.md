@@ -1,3 +1,12 @@
+# [1.5.0](https://github.com/governify/join-bluejay/compare/v1.4.0...v1.5.0) (2023-02-12)
+
+
+### Features
+
+* installed newrelic ([fd46421](https://github.com/governify/join-bluejay/commit/fd46421fcdc17f046f40612ab53f4d6d4723f8de))
+
+
+
 # [1.4.0](https://github.com/governify/join-bluejay/compare/v1.3.0...v1.4.0) (2023-02-02)
 
 
