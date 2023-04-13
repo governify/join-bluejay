@@ -44,7 +44,7 @@ app.get('/getYml', async(req, res) => {
 });
 
 app.get('/badge', (req, res) => {
-    res.send("Not implemented yet");
+    res.sendFile(__dirname + '/views/badge.html');
 });
 
 http.listen(port, () => {
