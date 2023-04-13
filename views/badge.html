@@ -1,0 +1,123 @@
+<html>
+
+<head>
+    <title>Badge generator</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <script>
+        
+        // Aux
+        function sendclick(event, btn) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById(btn).click();
+            }
+        }
+
+        async function checkRepoForBadge() {
+
+            const repoURL = document.getElementById('repoURL').value.trim();
+            if (!repoURL) return
+
+            document.getElementById('result').innerHTML = '<br/>Checking...';
+
+            const data = { repoList: [repoURL] };
+
+            try {
+                const response = await fetch('https://scopes.bluejay.governify.io/api/v1/scopes/development/check',
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json'},
+                        body: JSON.stringify(data),
+                    }
+                );
+                const responseData = await response.json();
+                generateBadge(responseData, repoURL);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = '<br/>There is a problem with the badge generator, please contact admin';
+            }
+        }
+
+
+        function generateBadge(responseData, repoURL) {
+            document.getElementById('result').innerHTML = '<br/>Generating, please wait...';
+            
+            const courseCode = document.getElementById('courseCode').value;
+
+            console.log("courseCode: " + courseCode);
+            console.log("verifiedRepoURL: " + repoURL);
+
+            if (courseCode === '' || repoURL === '') { return; }
+            
+            const data = { courseId: courseCode, repoList: [repoURL]};
+
+
+            fetch('https://scopes.bluejay.governify.io/api/v1/scopes/development/generate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(response => response.json())
+            .then(data => {
+                showBadgeGenerationResult(data, courseCode);
+            }).catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function showBadgeGenerationResult(result, courseId) {
+            var resultHTML = 'Error generating badge :(';
+            if (result.code === 200 && result.projects.length === 1) {
+                if (result.projects[0].errors[0] === 'The is no new changes for this project scope.') {
+                    const projectScope = result.projects[0].oldScope;
+                    var dashboardURL = 'http://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                    resultHTML = "Badge generated! If you want to add the badge to your repo's README.md you can copy the following markdown:<br><br><i>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-Dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
+                }
+            }
+
+            document.getElementById('result').innerHTML = resultHTML
+            return false;
+        }
+
+
+
+        window.addEventListener('load', function () {
+            console.log('Document loaded!');
+            document.getElementById('repoURL').focus();
+        });
+    </script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+</head>
+
+<body style="font-family: 'Roboto Mono', monospace; background-color: rgb(143, 188, 255);">
+    <div style="min-height: 91vh; margin: 2%; padding: 3%; background-color: white; border: 1px solid rgb(151, 151, 151);">
+        <h1 style="width: 100%; text-align: center; padding-bottom: 10px; color: rgb(41, 126, 255);">Badge generator</h1>
+        <hr />
+        <div style="margin:2%">
+            <h5 style="width: 100%; text-align: left; padding-bottom: 10px; font-size: 1.1rem;"> 
+                Please, enter you GitHub or GitLab Repository URL containing the <a href="https://github.com/governifyauditor/goldenflow-showcase-project/blob/main/info.yml">
+                <span style="color: rgb(41, 126, 255);">info.yml</span></a> file to generate its associated badge.
+            </h5>
+            <div class="form-inline flex">
+                <input id="repoURL" class="form-control col-8 mr-3" placeholder="https://github.com/governifyauditor/goldenflow-showcase-project" onkeyup="sendclick(event, 'btnCheck')">
+                <select id="courseCode" name="courseCode" class="form-control mr-3 col-2">
+                    <option value="PSG2-2023">PSG2-2023</option>
+                    <option value="ISPP-2023">ISPP-2023</option>
+                    <option value="CS169L-23">CS169L-23</option>
+                </select>
+                <button id="btnCheck" class="btn btn-outline-primary col-1" type="submit" onsubmit="checkRepoForBadge()" onclick="checkRepoForBadge()">Generate</button>
+            </div>
+
+            <div id="result" style="padding: 1% 5%;">
+            </div>
+        </div>
+        
+        <div style="margin:2%; display: none;" id="generationDiv">
+            <div id="generationResult" style="padding: 1% 5%;"></div>
+        </div>
+
+        <div style="margin:2%;" id="generatedBadge">
+            <div id="asd" style="padding: 1% 5%;"></div>
+        </div>
+    </div>
+</body>
