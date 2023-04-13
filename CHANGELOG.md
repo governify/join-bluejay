@@ -1,3 +1,12 @@
+# [1.6.0](https://github.com/governify/join-bluejay/compare/v1.5.0...v1.6.0) (2023-04-13)
+
+
+### Features
+
+* Added badge generation ([97cf611](https://github.com/governify/join-bluejay/commit/97cf611b52b93cd58e539010f974bc97020e4b52))
+
+
+
 # [1.5.0](https://github.com/governify/join-bluejay/compare/v1.4.0...v1.5.0) (2023-02-12)
 
 
