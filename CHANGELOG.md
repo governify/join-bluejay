@@ -1,3 +1,12 @@
+# [1.7.0](https://github.com/governify/join-bluejay/compare/v1.6.0...v1.7.0) (2023-04-17)
+
+
+### Features
+
+* Added user credentials in badge generations ([e477dbb](https://github.com/governify/join-bluejay/commit/e477dbb343a676925418ada617218e80b89fc2f2))
+
+
+
 # [1.6.0](https://github.com/governify/join-bluejay/compare/v1.5.0...v1.6.0) (2023-04-13)
 
 
