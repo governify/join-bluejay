@@ -44,9 +44,6 @@
             
             const courseCode = document.getElementById('courseCode').value;
 
-            console.log("courseCode: " + courseCode);
-            console.log("verifiedRepoURL: " + repoURL);
-
             if (courseCode === '' || repoURL === '') { return; }
             
             const data = { courseId: courseCode, repoList: [repoURL]};
@@ -70,10 +67,16 @@
                 if (result.projects[0].errors[0] === 'The is no new changes for this project scope.') {
                     const projectScope = result.projects[0].oldScope;
                     var dashboardURL = 'http://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
-                    resultHTML = "Badge generated! If you want to add the badge to your repo's README.md you can copy the following markdown:<br><br><i>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-Dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i> (credentials: user/bluejay)';
+                    resultHTML = "Badge generated! If you want to add the badge to your repo's README.md you can copy the following markdown:<br><br><i style='word-wrap: break-word;'>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-" + courseId.replace(/-/g, '_') + "_" + projectScope.teamId.replace(/-/g, '_') + '-blue.svg)](' + dashboardURL + ')</i> (credentials: user/bluejay)';
+
+                } else {
+                    resultHTML += '<br><br>Errors:<br><br>';
+                    result.projects[0].errors.forEach(error => {
+                        resultHTML += error + '<br>';
+                    });
                 }
             }
-
+            
             document.getElementById('result').innerHTML = resultHTML
             return false;
         }
