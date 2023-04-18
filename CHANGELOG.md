@@ -1,3 +1,12 @@
+# [1.8.0](https://github.com/governify/join-bluejay/compare/v1.7.0...v1.8.0) (2023-04-18)
+
+
+### Features
+
+* Added error description and modified badge ([c35209a](https://github.com/governify/join-bluejay/commit/c35209a4a643ed017b33b483cbc7d1cfb25d3140))
+
+
+
 # [1.7.0](https://github.com/governify/join-bluejay/compare/v1.6.0...v1.7.0) (2023-04-17)
 
 
