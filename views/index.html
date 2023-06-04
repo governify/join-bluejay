@@ -142,19 +142,6 @@
                                 console.log('Register - Agreement created (tpa-' + projectId + ').');
                                 const periods = { periods: [{ from: '2021-01-18T00:00:00Z', to: new Date().toISOString() }] };
 
-                                // Compute points
-                                /*fetch('https://reporter.bluejay.governify.io/api/v4/contracts/tpa-' + projectId + '/createPointsFromPeriods', {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json'
-                                    },
-                                    body: JSON.stringify(periods)
-                                })
-                                    .then(response => console.log('Register - TPA is being computed now.'))
-                                    .catch((error) => {
-                                        console.error('Error:', error);
-                                    });*/
-
                                 // Start director
                                 fetch('https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json')
                                     .then(response => response.text())
@@ -306,11 +293,27 @@
                 <strong style="color: rgb(41, 126, 255);">2.</strong> To register your project in <span
                     style="color: rgb(41, 126, 255);" id="courseNameSpan"></span> course, click on join!
             </h5>
-
-            <!-- Input -->
+<!-- Select the course. (Dropdown, gets courses form scopes ) -->
             <div class="form-inline">
-                <input id="courseCode" class="form-control" style="width:89%; margin-right: 1%;"
-                    placeholder="Course Code" onkeyup="sendclick(event, 'btnGenerate')">
+                <select id="courseCode" class="form-select form-select-sm" onkeyup="sendclick(event, 'btnGenerate')"
+                    style="width:89%; margin-right: 1%;">
+                    <script>// adds options in the <select>
+                        courses = fetch("https://scopes.bluejay.governify.io/api/v1/scopes/development/courses")// in production
+                        // courses = fetch("http://localhost:5700/api/v1/scopes/development/courses") //local
+                            .then(response => response.json())
+                            .then(courses => {
+                                if(!courses.scope) throw new Error("No courses found in response")
+                                courses.scope.forEach(function (classInCourse) {
+                                    var option = document.createElement("option");
+                                    option.text = classInCourse.classId;
+                                    document.getElementById("courseCode").add(option);
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error getting the courses:', error);
+                            });
+                    </script>
+                </select>
                 <button id="btnGenerate" class="btn btn-outline-success" style="width: 10%;" type="submit"
                     onsubmit="generate()" onclick="generate()">Join</button>
             </div>
