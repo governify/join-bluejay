@@ -57,7 +57,7 @@
             if (result.code === 200 && result.projects.length === 1) {
                 const err = result.projects[0].errors;
                 if ((err.length === 0)) {
-                    resultHTML = "<br/><strong>Yay!! That repo has a valid <span style='color: rgb(41, 126, 255)'>bluejay</span> info.yaml 😊</strong><br/>";
+                    resultHTML = "<br/><strong>Yay!! That repo has a valid <span style='color: rgb(41, 126, 255)'>bluejay</span> info.yml 😊</strong><br/>";
                     verifiedRepoURL = repoURL;
                     document.getElementById('generationDiv').style.display = 'block';
                 } else {
@@ -268,14 +268,14 @@
         <div style="margin:2%">
             <h5 style="width: 100%; text-align: left; padding-bottom: 10px; font-size: 1.1rem;"><strong
                     style="color: rgb(41, 126, 255);">1.</strong> Please, enter you GitHub or GitLab Repository URL
-                containing the <a href="https://github.com/governifyauditor/goldenflow-showcase-project/blob/main/info.yml"><span style="color: rgb(41, 126, 255);">info.yml</span></a> file to check it's validity.</h5>
+                containing the <a href="https://github.com/governifyauditor/goldenflow-showcase-project/blob/main/info.yml"><span style="color: rgb(41, 126, 255);">info.yml</span></a> file in the <b>main</b> branch to check it's validity.</h5>
                 <div class="form-inline">
                 <input id="repoURL" class="form-control" style="width:89%; margin-right: 1%;"
                     placeholder="https://github.com/governifyauditor/goldenflow-showcase-project" onkeyup="sendclick(event, 'btnCheck')">
                 <button id="btnCheck" class="btn btn-outline-info" style="width: 10%;" type="submit" onsubmit="check()"
                     onclick="check()">Check</button>
             </div>
-            <p style="margin: 10px;">Don't have an <b>info.yaml</b> file? <a href="/wizard">Create one now!</a></p>
+            <p style="margin: 10px;">Don't have an <b>info.yml</b> file? <a href="/wizard">Create one now!</a></p>
             <span style="margin: 10px;">Already have a registered project? <a href="/badge">Get your own badge here!</a></span>
 
             <div id="result" style="padding: 1% 5%;">
