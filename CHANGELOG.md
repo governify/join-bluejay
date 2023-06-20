@@ -1,3 +1,12 @@
+## [1.9.1](https://github.com/governify/join-bluejay/compare/v1.9.0...v1.9.1) (2023-06-20)
+
+
+### Bug Fixes
+
+* hide hidden courses in join ([f5de5f0](https://github.com/governify/join-bluejay/commit/f5de5f0ef45c5713375b94e51812ffa2ce53a94b))
+
+
+
 # [1.9.0](https://github.com/governify/join-bluejay/compare/v1.8.0...v1.9.0) (2023-06-20)
 
 
