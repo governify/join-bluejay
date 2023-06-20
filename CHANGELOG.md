@@ -1,3 +1,19 @@
+# [1.9.0](https://github.com/governify/join-bluejay/compare/v1.8.0...v1.9.0) (2023-06-20)
+
+
+### Bug Fixes
+
+* env config ([ae85862](https://github.com/governify/join-bluejay/commit/ae8586263dbd56b29cca8498fb171865d22d8419))
+* yaml not supported ([bf09fb2](https://github.com/governify/join-bluejay/commit/bf09fb20026a00c1ae3b0763032b4b10d1d6ef1e))
+* yaml typos ([f906af4](https://github.com/governify/join-bluejay/commit/f906af415da98484a58d677356aeea5914220f3a))
+
+
+### Features
+
+* Courses dropdown ([8d9de49](https://github.com/governify/join-bluejay/commit/8d9de496cd65e9767ad131e8f43004da31d055c7))
+
+
+
 # [1.8.0](https://github.com/governify/join-bluejay/compare/v1.7.0...v1.8.0) (2023-04-18)
 
 
