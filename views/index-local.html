@@ -304,9 +304,11 @@
                             .then(courses => {
                                 if(!courses.scope) throw new Error("No courses found in response")
                                 courses.scope.forEach(function (classInCourse) {
-                                    var option = document.createElement("option");
-                                    option.text = classInCourse.classId;
-                                    document.getElementById("courseCode").add(option);
+                                    if( ! classInCourse.hidden){
+                                        var option = document.createElement("option");
+                                        option.text = classInCourse.classId;
+                                        document.getElementById("courseCode").add(option);
+                                    }
                                 });
                             })
                             .catch(error => {
