@@ -447,9 +447,13 @@
 
         const downloads = document.getElementById('download')
         downloads.addEventListener('click', async () => {
-            await axios.post("https://scopes.bluejay.governify.io/api/v1/scopes/development/check", { name: 'Wizard', data: ymlText })
+            // This give cors error
+            // await axios.post("https://scopes.bluejay.governify.io/api/v1/scopes/development/check", { name: 'Wizard', data: ymlText })
+            await axios.post("http://join.bluejay.governify.io/wizzard-check", { name: 'Wizard', data: ymlText })
+            // This is for local only
             // await axios.post("http://localhost:5700/api/v1/scopes/development/check", { name: 'Wizard', data: ymlText })
                 .then(res => {
+                    console.log(res)
                     console.log(res.data.projects[0].errors)
                     var downloadModal = new bootstrap.Modal(document.getElementById('downloadModal'), {
                         keyboard: false
