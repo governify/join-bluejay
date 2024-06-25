@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -16,19 +17,9 @@
                 document.getElementById('courseCode').value = urlParams.get("course");
                 document.getElementById('courseCode').style.display = 'none';
                 document.getElementById('btnGenerate').style.width = '100%';
-                fetchCourseJoinCode(urlParams.get("course"));
             } else {
                 document.getElementById('courseMessage').style.display = 'none';
                 loadCourses();
-            }
-            const courseCodeSelect = document.getElementById('courseCode');
-            if (courseCodeSelect) {
-                courseCodeSelect.addEventListener('change', (event) => {
-                    const selectedCourseId = event.target.value;
-                    fetchCourseJoinCode(selectedCourseId);
-                });
-            } else {
-                console.error('No courseCode element found');
             }
         });
 
@@ -45,9 +36,6 @@
                             courseCodeSelect.add(option);
                         }
                     });
-                    if (courses.scope.length === 1) {
-                        fetchCourseJoinCode(courses.scope[0].classId);
-                    }
                 })
                 .catch(error => {
                     console.error('Error getting the courses:', error);
@@ -55,10 +43,12 @@
         }
 
         function fetchCourseJoinCode(courseId) {
-            fetch(`https://scopes.bluejay.governify.io/api/v1/scopes/development/${courseId}`)
+            console.log('Fetching course join code for ' + courseId);
+            return fetch(`https://scopes.bluejay.governify.io/api/v1/scopes/development/${courseId}`)
                 .then(response => response.json())
                 .then(data => {
                     courseJoinCode = data.scope.joinCode;
+                    return courseJoinCode;
                 })
                 .catch(error => {
                     console.error('Error fetching course join code:', error);
@@ -66,6 +56,7 @@
         }
 
         let verifiedRepoURL = '';
+
         // Check
         function check() {
             resetGeneration();
@@ -131,34 +122,36 @@
         // Generation
         function generate() {
             const userJoinCode = document.getElementById('userJoinCode').value.trim();
-            if (userJoinCode !== courseJoinCode) {
-                document.getElementById('generationResult').innerHTML = '<br/><strong>Wrong Join Code!</strong>';
-                return;
-            }
-
             const courseCode = document.getElementById('courseCode').value;
             if (courseCode === '' || verifiedRepoURL === '') { return; }
 
-            document.getElementById('generationResult').innerHTML = '<br/>Generating, please wait...';
-            console.log('Generating ' + verifiedRepoURL + ' with course code ' + courseCode + '!!');
+            fetchCourseJoinCode(courseCode).then(fetchedJoinCode => {
+                if (userJoinCode !== fetchedJoinCode) {
+                    document.getElementById('generationResult').innerHTML = '<br/><strong>Wrong Join Code!</strong>';
+                    return;
+                }
 
-            const data = { courseId: courseCode, repoList: [verifiedRepoURL] };
+                document.getElementById('generationResult').innerHTML = '<br/>Generating, please wait...';
+                console.log('Generating ' + verifiedRepoURL + ' with course code ' + courseCode + '!!');
 
-            fetch('https://scopes.bluejay.governify.io/api/v1/scopes/development/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    showGenerationResult(data, courseCode);
+                const data = { courseId: courseCode, repoList: [verifiedRepoURL] };
+
+                fetch('https://scopes.bluejay.governify.io/api/v1/scopes/development/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
                 })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    showGenerationResult(error);
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        showGenerationResult(data, courseCode);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        showGenerationResult(error);
+                    });
+            });
         }
 
         function showGenerationResult(result, courseId) {
@@ -183,7 +176,7 @@
                                     console.log('Register - TPA template obtained.');
                                     const projectId = projectScope.projectId;
                                     const tpa = JSON.parse(data.replace(/1010101010/g, projectId).replace(/2020202020/g, courseId));
-                                    if (!tpa.context.infrastructure) {tpa.context.infrastructure = {};}
+                                    if (!tpa.context.infrastructure) { tpa.context.infrastructure = {}; }
                                     tpa.context.infrastructure.render = 'https://ui.bluejay.governify.io/render?model=https://registry.bluejay.governify.io/api/v6/agreements/' + tpa.id + '&view=/renders/tpa/default.html&ctrl=/renders/tpa/default.js';
                                     // Add notifications
                                     tpa.context.definitions.notifications = projectScope.notifications ? projectScope.notifications : {};
@@ -196,7 +189,7 @@
                                         templateId: courseTemplateId,
                                         ...tpa
                                     };
-                            
+
                                     // Create TPA
                                     fetch('https://registry.bluejay.governify.io/api/v6/agreements', {
                                         method: 'POST',
@@ -215,7 +208,7 @@
                                                     return response.text().then(errorMsg => {
                                                         throw new Error(errorMsg);
                                                     });
-                                                } 
+                                                }
                                                 return response.text();
                                             })
                                             .then(directorData => {
@@ -224,7 +217,7 @@
                                                 // Run director
                                                 runDirectorTask(directorJSON, courseId, projectId);
                                             }).catch(err => {
-                                                console.log("Error: Failed obtaining director.json computation info.\nURL:", 'https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json\n' + err)
+                                                console.log("Error: Failed obtaining director.json computation info.\nURL:", 'http://localhost:5200/api/v1/public/director/' + courseId + '.json\n' + err)
                                                 console.log("Register - Fetching template.json instead ...");
                                                 fetch('https://assets.bluejay.governify.io/api/v1/public/director/template.json')
                                                     .then(response => response.text())
@@ -237,23 +230,23 @@
                                                         const endDate = new Date(initDate);
                                                         endDate.setMonth(initDate.getMonth() + 4);
                                                         directorJSON.end = endDate.toISOString().split('.')[0] + 'Z';
-                                                        fetch('https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json', {  
+                                                        fetch('https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.json', {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Content-Type': 'application/json'
                                                             },
                                                             body: JSON.stringify(directorJSON)
                                                         })
-                                                        .then(response => {
-                                                            if (response.ok) {
-                                                                console.log("Director.json file successfully created.");
-                                                            } else {
-                                                                throw new Error("Failed to create director.json file.");
-                                                            }
-                                                        })
-                                                        .catch(err => {
-                                                            console.error("Error while posting director JSON:", err);
-                                                        });
+                                                            .then(response => {
+                                                                if (response.ok) {
+                                                                    console.log("Director.json file successfully created.");
+                                                                } else {
+                                                                    throw new Error("Failed to create director.json file.");
+                                                                }
+                                                            })
+                                                            .catch(err => {
+                                                                console.error("Error while posting director JSON:", err);
+                                                            });
                                                         // Run director
                                                         runDirectorTask(directorJSON, courseId, projectId);
                                                     })
@@ -271,12 +264,12 @@
                         .catch(error => {
                             console.error('Error fetching course -> template id :', error);
                         });
-                   
-                    
+
+
                     if (blindCourses.includes(courseId)) {
                         resultHTML = '<strong>Congrats! Your project has successfully joined Bluejay! </strong><br/>';
                     } else {
-                        var dashboardURL = 'https://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=http://localhost:5300/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                        var dashboardURL = 'https://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
                         resultHTML = '<strong>Congrats! Your project dashboard has been created! </strong><br/>';
                         resultHTML += '<span>If this is an empty repo, no data will be shown at the moment. As you start working on it (with P/R, Commit, stories, etc.) the analysis will begin and you can access the dashboard by clicking on the following badge <a href="' + dashboardURL + '" target="_blank"><img src="https://img.shields.io/badge/Bluejay-Dashboard_"' + projectScope.teamId + '"-blue.svg"></img></a> (credentials: user/bluejay)</span><br/>';
                         resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-Dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
@@ -286,7 +279,7 @@
                     if (blindCourses.includes(courseId)) {
                         resultHTML = '<strong>Your project had already properly joined to bluejay! </strong><br/>';
                     } else {
-                        var dashboardURL = 'https://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=http://localhost:5300/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                        var dashboardURL = 'https://dashboard.bluejay.governify.io/dashboard/script/dashboardLoader.js?dashboardURL=https://reporter.bluejay.governify.io/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
                         resultHTML = '<strong>Your project is already registered and there are no changes to your info.yml!</strong><br/>';
                         resultHTML += '<span>If you want to access the dashboard click on the following badge <a href="' + dashboardURL + '" target="_blank"><img src="https://img.shields.io/badge/Bluejay-Dashboard_"' + projectScope.teamId + '"-blue.svg"></img></a> (credentials: user/bluejay)</span><br/>';
                         resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-Dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
@@ -314,7 +307,7 @@
             return false;
         }
 
-        function runDirectorTask(directorJSON, courseId, projectId){
+        function runDirectorTask(directorJSON, courseId, projectId) {
             const directorRequest = {
                 id: 'tpa-' + projectId,
                 script: 'https://assets.bluejay.governify.io/api/v1/public/director/' + courseId + '.js',
@@ -326,7 +319,7 @@
                 end: directorJSON.end,
                 interval: directorJSON.interval
             }
-            fetch('http://localhost:5800/api/v1/tasks', {
+            fetch('https://director.bluejay.governify.io/api/v1/tasks', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -334,7 +327,7 @@
                 body: JSON.stringify(directorRequest)
             })
                 .then(response => {
-                    fetch('http://localhost:5800/api/v1/tasks/' + directorRequest.id + '/run', {
+                    fetch('https://director.bluejay.governify.io/api/v1/tasks/' + directorRequest.id + '/run', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -346,15 +339,15 @@
                                 throw new Error(error);
                             });
                         }
-                        return response.text();  
+                        return response.text();
                     })
-                    .then(data => {
-                        console.log("Successfully launched first data collect task");
-                        console.log('Register - Director is set up and working.');
-                    })
-                    .catch(err => {
-                        console.error('Error during task execution:', err);
-                    });
+                        .then(data => {
+                            console.log("Successfully launched first data collect task");
+                            console.log('Register - Director is set up and working.');
+                        })
+                        .catch(err => {
+                            console.error('Error during task execution:', err);
+                        });
                 })
                 .catch((error) => {
                     console.error('Error:', error);

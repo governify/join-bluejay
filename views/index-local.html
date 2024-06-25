@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -16,19 +17,9 @@
                 document.getElementById('courseCode').value = urlParams.get("course");
                 document.getElementById('courseCode').style.display = 'none';
                 document.getElementById('btnGenerate').style.width = '100%';
-                fetchCourseJoinCode(urlParams.get("course"));
             } else {
                 document.getElementById('courseMessage').style.display = 'none';
                 loadCourses();
-            }
-            const courseCodeSelect = document.getElementById('courseCode');
-            if (courseCodeSelect) {
-                courseCodeSelect.addEventListener('change', (event) => {
-                    const selectedCourseId = event.target.value;
-                    fetchCourseJoinCode(selectedCourseId);
-                });
-            } else {
-                console.error('No courseCode element found');
             }
         });
 
@@ -45,9 +36,6 @@
                             courseCodeSelect.add(option);
                         }
                     });
-                    if (courses.scope.length === 1) {
-                        fetchCourseJoinCode(courses.scope[0].classId);
-                    }
                 })
                 .catch(error => {
                     console.error('Error getting the courses:', error);
@@ -55,10 +43,12 @@
         }
 
         function fetchCourseJoinCode(courseId) {
-            fetch(`http://localhost:5700/api/v1/scopes/development/${courseId}`)
+            console.log('Fetching course join code for ' + courseId);
+            return fetch(`http://localhost:5700/api/v1/scopes/development/${courseId}`)
                 .then(response => response.json())
                 .then(data => {
                     courseJoinCode = data.scope.joinCode;
+                    return courseJoinCode;
                 })
                 .catch(error => {
                     console.error('Error fetching course join code:', error);
@@ -66,6 +56,7 @@
         }
 
         let verifiedRepoURL = '';
+
         // Check
         function check() {
             resetGeneration();
@@ -131,34 +122,36 @@
         // Generation
         function generate() {
             const userJoinCode = document.getElementById('userJoinCode').value.trim();
-            if (userJoinCode !== courseJoinCode) {
-                document.getElementById('generationResult').innerHTML = '<br/><strong>Wrong Join Code!</strong>';
-                return;
-            }
-
             const courseCode = document.getElementById('courseCode').value;
             if (courseCode === '' || verifiedRepoURL === '') { return; }
 
-            document.getElementById('generationResult').innerHTML = '<br/>Generating, please wait...';
-            console.log('Generating ' + verifiedRepoURL + ' with course code ' + courseCode + '!!');
+            fetchCourseJoinCode(courseCode).then(fetchedJoinCode => {
+                if (userJoinCode !== fetchedJoinCode) {
+                    document.getElementById('generationResult').innerHTML = '<br/><strong>Wrong Join Code!</strong>';
+                    return;
+                }
 
-            const data = { courseId: courseCode, repoList: [verifiedRepoURL] };
+                document.getElementById('generationResult').innerHTML = '<br/>Generating, please wait...';
+                console.log('Generating ' + verifiedRepoURL + ' with course code ' + courseCode + '!!');
 
-            fetch('http://localhost:5700/api/v1/scopes/development/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    showGenerationResult(data, courseCode);
+                const data = { courseId: courseCode, repoList: [verifiedRepoURL] };
+
+                fetch('http://localhost:5700/api/v1/scopes/development/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
                 })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    showGenerationResult(error);
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        showGenerationResult(data, courseCode);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        showGenerationResult(error);
+                    });
+            });
         }
 
         function showGenerationResult(result, courseId) {
@@ -183,7 +176,7 @@
                                     console.log('Register - TPA template obtained.');
                                     const projectId = projectScope.projectId;
                                     const tpa = JSON.parse(data.replace(/1010101010/g, projectId).replace(/2020202020/g, courseId));
-                                    if (!tpa.context.infrastructure) {tpa.context.infrastructure = {};}
+                                    if (!tpa.context.infrastructure) { tpa.context.infrastructure = {}; }
                                     tpa.context.infrastructure.render = 'http://localhost:5100/render?model=http://localhost:5400/api/v6/agreements/' + tpa.id + '&view=/renders/tpa/default.html&ctrl=/renders/tpa/default.js';
                                     // Add notifications
                                     tpa.context.definitions.notifications = projectScope.notifications ? projectScope.notifications : {};
@@ -196,7 +189,7 @@
                                         templateId: courseTemplateId,
                                         ...tpa
                                     };
-                            
+
                                     // Create TPA
                                     fetch('http://localhost:5400/api/v6/agreements', {
                                         method: 'POST',
@@ -215,7 +208,7 @@
                                                     return response.text().then(errorMsg => {
                                                         throw new Error(errorMsg);
                                                     });
-                                                } 
+                                                }
                                                 return response.text();
                                             })
                                             .then(directorData => {
@@ -237,23 +230,23 @@
                                                         const endDate = new Date(initDate);
                                                         endDate.setMonth(initDate.getMonth() + 4);
                                                         directorJSON.end = endDate.toISOString().split('.')[0] + 'Z';
-                                                        fetch('http://localhost:5200/api/v1/public/director/' + courseId + '.json', {  
+                                                        fetch('http://localhost:5200/api/v1/public/director/' + courseId + '.json', {
                                                             method: 'POST',
                                                             headers: {
                                                                 'Content-Type': 'application/json'
                                                             },
                                                             body: JSON.stringify(directorJSON)
                                                         })
-                                                        .then(response => {
-                                                            if (response.ok) {
-                                                                console.log("Director.json file successfully created.");
-                                                            } else {
-                                                                throw new Error("Failed to create director.json file.");
-                                                            }
-                                                        })
-                                                        .catch(err => {
-                                                            console.error("Error while posting director JSON:", err);
-                                                        });
+                                                            .then(response => {
+                                                                if (response.ok) {
+                                                                    console.log("Director.json file successfully created.");
+                                                                } else {
+                                                                    throw new Error("Failed to create director.json file.");
+                                                                }
+                                                            })
+                                                            .catch(err => {
+                                                                console.error("Error while posting director JSON:", err);
+                                                            });
                                                         // Run director
                                                         runDirectorTask(directorJSON, courseId, projectId);
                                                     })
@@ -271,8 +264,8 @@
                         .catch(error => {
                             console.error('Error fetching course -> template id :', error);
                         });
-                   
-                    
+
+
                     if (blindCourses.includes(courseId)) {
                         resultHTML = '<strong>Congrats! Your project has successfully joined Bluejay! </strong><br/>';
                     } else {
@@ -314,7 +307,7 @@
             return false;
         }
 
-        function runDirectorTask(directorJSON, courseId, projectId){
+        function runDirectorTask(directorJSON, courseId, projectId) {
             const directorRequest = {
                 id: 'tpa-' + projectId,
                 script: 'http://localhost:5200/api/v1/public/director/' + courseId + '.js',
@@ -346,15 +339,15 @@
                                 throw new Error(error);
                             });
                         }
-                        return response.text();  
+                        return response.text();
                     })
-                    .then(data => {
-                        console.log("Successfully launched first data collect task");
-                        console.log('Register - Director is set up and working.');
-                    })
-                    .catch(err => {
-                        console.error('Error during task execution:', err);
-                    });
+                        .then(data => {
+                            console.log("Successfully launched first data collect task");
+                            console.log('Register - Director is set up and working.');
+                        })
+                        .catch(err => {
+                            console.error('Error during task execution:', err);
+                        });
                 })
                 .catch((error) => {
                     console.error('Error:', error);
