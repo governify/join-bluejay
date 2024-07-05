@@ -8,6 +8,7 @@ const port  = process.env.PORT || 5000;
 const axios = require('axios');
 
 var CryptoJS = require("crypto-js");
+const e = require('express');
 
 app.get('/', (req, res) => {
     if (process.env.NODE_ENV === 'production') {
@@ -18,7 +19,11 @@ app.get('/', (req, res) => {
 });
 
 app.get('/wizard', (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
     res.sendFile(__dirname + '/views/wizard.html');
+    } else {
+        res.sendFile(__dirname + '/views/wizard-local.html');
+    }
 });
 
 app.get('/checker', (req, res) => {
