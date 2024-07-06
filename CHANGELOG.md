@@ -1,3 +1,22 @@
+# [1.10.0](https://github.com/governify/join-bluejay/compare/v1.9.1...v1.10.0) (2024-07-05)
+
+
+### Bug Fixes
+
+* check info.yml on production enviroment ([12c9d74](https://github.com/governify/join-bluejay/commit/12c9d7411c09cdf480b1d33810c57d44570a41c7))
+
+
+### Features
+
+* env.example ([22746d3](https://github.com/governify/join-bluejay/commit/22746d3105e0b4f7bd96d8169f3d3dab20569c84))
+
+
+### Reverts
+
+* Revert "wizzard check fix?" ([e5d7ca8](https://github.com/governify/join-bluejay/commit/e5d7ca83dab089b80fb939646d2d749ac451cc81))
+
+
+
 ## [1.9.1](https://github.com/governify/join-bluejay/compare/v1.9.0...v1.9.1) (2023-06-20)
 
 
