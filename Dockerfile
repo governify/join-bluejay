@@ -1,19 +1,14 @@
-FROM governify/base-node-14:1.0
-
+# Stage 1: Build the React application
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
 COPY . .
-RUN npm install --only=prod
+RUN npm run build
 
-ARG NODE_ENV=production
-ENV NODE_ENV $NODE_ENV
-
-# New Relic config
-RUN apk add python
-ENV NEW_RELIC_NO_CONFIG_FILE=true
-ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
-ENV NEW_RELIC_LOG=stdout
-
-ARG PORT=80
-ENV PORT $PORT
-EXPOSE $PORT
-
-CMD [ "node", "index.js" ]
+# Stage 2: Serve the React application using Nginx
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
