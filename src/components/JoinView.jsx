@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle, AlertCircle } from "lucide-react"
+import MoreInfo from "@/components/MoreInfo"
 import config from "../config"
 import DashboardBadge from './DashboardBadge';
 
@@ -21,7 +22,7 @@ const JoinView = () => {
   const [courseMessage, setCourseMessage] = useState("hidden")
   const [userJoinCode, setUserJoinCode] = useState("")
   const [courseJoinCode, setCourseJoinCode] = useState("")
-  const blindCourses = ['PSG2-2021', 'ISPP-2021']
+  const [showMoreInfo, setShowMoreInfo] = useState(false);
 
   useEffect(() => {
     fetch(`${config.scopeUrl}/api/v1/scopes/development/courses`)
@@ -98,6 +99,7 @@ const JoinView = () => {
   const showGenerationResult = (result, courseId) => {
     if (result.code === 200 && result.projects.length === 1) {
       const err = result.projects[0].errors;
+      console.log("Result: ", JSON.stringify(result, null, 2));
       if (err) console.log(err);
       if (!err || err.length === 0) {
         const projectScope = result.projects[0].newScope;
@@ -149,20 +151,16 @@ const JoinView = () => {
           .catch(error => {
             console.error('Error fetching course -> template id :', error);
           });
-        if (blindCourses.includes(courseId)) {
-          setGenerationResult("blindSuccess");
+        const dashboardURL = `${config.dashboardUrl}/dashboard/script/dashboardLoader.js?dashboardURL=${config.reporterUrl}/api/v4/dashboards/tpa-${projectScope.projectId}/main`;
+        if(result.projects[0].oldScope) {
+          setGenerationResult({ type: "successUpdate", url: dashboardURL, teamId: projectScope.teamId });
         } else {
-          const dashboardURL = `${config.dashboardUrl}/dashboard/script/dashboardLoader.js?dashboardURL=${config.reporterUrl}/api/v4/dashboards/tpa-${projectScope.projectId}/main`;
-          setGenerationResult({ type: "dashboard", url: dashboardURL, teamId: projectScope.teamId });
+          setGenerationResult({ type: "successJoin", url: dashboardURL, teamId: projectScope.teamId });
         }
       } else if (err[0] === 'The is no new changes for this project scope.') {
         const projectScope = result.projects[0].oldScope;
-        if (blindCourses.includes(courseId)) {
-          setGenerationResult("existingBlindSuccess");
-        } else {
-          const dashboardURL = `${config.dashboardUrl}/dashboard/script/dashboardLoader.js?dashboardURL=${config.reporterUrl}/api/v4/dashboards/tpa-${projectScope.projectId}/main`;
-          setGenerationResult({ type: "existingProject", url: dashboardURL, teamId: projectScope.teamId });
-        }
+        const dashboardURL = `${config.dashboardUrl}/dashboard/script/dashboardLoader.js?dashboardURL=${config.reporterUrl}/api/v4/dashboards/tpa-${projectScope.projectId}/main`;
+        setGenerationResult({ type: "existingProject", url: dashboardURL, teamId: projectScope.teamId });
       } else {
         setGenerationResult("error");
       }
@@ -367,6 +365,7 @@ const JoinView = () => {
                       const selected = courses.find(course => course.classId === value)
                       setSelectedCourse(selected)
                       setGenerationResult("")
+                      setShowMoreInfo(false)
                     }}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a course" />
@@ -381,13 +380,6 @@ const JoinView = () => {
                     </Select>
                     <Button onClick={generate}>Join</Button>
                   </div>
-                  {generationResult === "success" && (
-                    <Alert className="mt-4 bg-green-50 border-green-200">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <AlertTitle>Success</AlertTitle>
-                      <AlertDescription>Congrats! Your project has successfully joined Bluejay!</AlertDescription>
-                    </Alert>
-                  )}
                   {generationResult === "error" && (
                     <Alert className="mt-4 bg-red-50 border-red-200">
                       <AlertCircle className="h-4 w-4 text-red-500" />
@@ -411,19 +403,22 @@ const JoinView = () => {
                       <AlertDescription>The join code you entered is incorrect. Please try again.</AlertDescription>
                     </Alert>
                   )}
-                  {generationResult === "blindSuccess" && (
+                  {generationResult.type === "successJoin" && (
                     <Alert className="mt-4 bg-green-50 border-green-200">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <AlertTitle>Success</AlertTitle>
-                      <AlertDescription>Congrats! Your project has successfully joined Bluejay!</AlertDescription>
+                      <AlertTitle>Successful Join</AlertTitle>
+                      <AlertDescription>
+                      Congrats! Your project has successfully joined Bluejay!{" "}
+                        <DashboardBadge url={generationResult.url} teamId={generationResult.teamId} hidden={selectedCourse.hideDashboardLink}/>
+                      </AlertDescription>
                     </Alert>
                   )}
-                  {generationResult.type === "dashboard" && (
+                  {generationResult.type === "successUpdate" && (
                     <Alert className="mt-4 bg-green-50 border-green-200">
                       <CheckCircle className="h-4 w-4 text-green-500" />
-                      <AlertTitle>Success</AlertTitle>
+                      <AlertTitle>Successful Update</AlertTitle>
                       <AlertDescription>
-                        Congrats! Your project dashboard has been created!{" "}
+                      Congrats! Your existing project has successfully updated!{" "}
                         <DashboardBadge url={generationResult.url} teamId={generationResult.teamId} hidden={selectedCourse.hideDashboardLink}/>
                       </AlertDescription>
                     </Alert>
@@ -433,8 +428,9 @@ const JoinView = () => {
                       <AlertCircle className="h-4 w-4 text-yellow-500" />
                       <AlertTitle>Project Already Exists</AlertTitle>
                       <AlertDescription>
-                        The project already exists within the scope. You can access the existing dashboard using the following link:{" "}
-                          <DashboardBadge url={generationResult.url} teamId={generationResult.teamId} hidden={selectedCourse.hideDashboardLink}/>)
+                        The project already exists within the scope and the info.yml don't have changes.{" "}
+                          <DashboardBadge url={generationResult.url} teamId={generationResult.teamId} hidden={selectedCourse.hideDashboardLink}/>
+                        <MoreInfo showMoreInfo={showMoreInfo} setShowMoreInfo={setShowMoreInfo} />
                       </AlertDescription>
                     </Alert>
                   )}

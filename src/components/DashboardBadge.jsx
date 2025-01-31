@@ -7,6 +7,8 @@ const DashboardBadge = ({ url, teamId, hidden }) => {
 
     return (
         <>
+            You can access the dashboard using the following link:
+            <br />
             <a href={url} target="_blank" rel="noopener noreferrer">
                 <img
                     src={`https://img.shields.io/badge/Bluejay-Dashboard_${teamId}-blue.svg`}
