@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import  { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { CheckCircle, AlertCircle } from "lucide-react"
 import MoreInfo from "@/components/MoreInfo"
-import config from "../config"
+import config, { loadConfig } from "../config"
 import DashboardBadge from './DashboardBadge';
 
 const JoinView = () => {
@@ -25,14 +25,19 @@ const JoinView = () => {
   const [showMoreInfo, setShowMoreInfo] = useState(false);
 
   useEffect(() => {
-    fetch(`${config.scopeUrl}/api/v1/scopes/development/courses`)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("CONFIG OBJECT: ", JSON.stringify(config, null, 2))
-        if (!data.scope) throw new Error("No courses found in response")
-        setCourses(data.scope.filter((course) => !course.hidden))
-      })
-      .catch((error) => console.error("Error getting the courses:", error))
+    const initializeConfig = async () => {
+      await loadConfig();
+      fetch(`${config.scopeUrl}/api/v1/scopes/development/courses`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("CONFIG OBJECT: ", JSON.stringify(config, null, 2))
+          if (!data.scope) throw new Error("No courses found in response")
+          setCourses(data.scope.filter((course) => !course.hidden))
+        })
+        .catch((error) => console.error("Error getting the courses:", error))
+    };
+
+    initializeConfig();
   }, [])
 
   const check = () => {
@@ -108,7 +113,11 @@ const JoinView = () => {
           .then(response => response.json())
           .then(data => {
             const courseTemplateId = data.scope.templateId;
-            console.log(`Register - Fetching TPA template ${courseTemplateId} ...`);
+            if (!courseTemplateId) {
+                alert("WARNING:\nPlease contact your admin with the following information:\n\n1. The course does not have an agreement template.\n2. Agreement could not be generated and needs manual creation in the TPA-manager service.\n3. Once the agreement is created, the calculations for agreement adherence must be manually activated in the TPA-manager service.");
+              return;
+            }
+            console.log(`Register - Fetching TPA template with id ${courseTemplateId}, URL: ${config.registryUrl}/api/v6/templates/${courseTemplateId}`);
             fetch(`${config.registryUrl}/api/v6/templates/${courseTemplateId}`)
               .then(response => response.text())
               .then(data => {
@@ -135,7 +144,7 @@ const JoinView = () => {
                     'Content-Type': 'application/json'
                   },
                   body: JSON.stringify(tpaOrdered)
-                }).then(async response => {
+                }).then(async () => {
                   console.log('Register - Agreement created.');
                   if(selectedCourse.autoRun){
                     await activateAutomaticTPACalculations(selectedCourse, projectScope);
@@ -304,7 +313,7 @@ const JoinView = () => {
                 </div>
                 <div className="mt-2 text-sm">
                   <span>
-                    Don't have an <b>info.yml</b> file?{" "}
+                    Don&apos;t have an <b>info.yml</b> file?{" "}
                   </span>
                   <a href="/join/wizard" className="text-blue-500 hover:underline">
                     Create one now!
@@ -428,7 +437,7 @@ const JoinView = () => {
                       <AlertCircle className="h-4 w-4 text-yellow-500" />
                       <AlertTitle>Project Already Exists</AlertTitle>
                       <AlertDescription>
-                        The project already exists within the scope and the info.yml don't have changes.{" "}
+                        The project already exists within the scope and the info.yml don&apos;t have changes.{" "}
                           <DashboardBadge url={generationResult.url} teamId={generationResult.teamId} hidden={selectedCourse.hideDashboardLink}/>
                         <MoreInfo showMoreInfo={showMoreInfo} setShowMoreInfo={setShowMoreInfo} />
                       </AlertDescription>

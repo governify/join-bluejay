@@ -12,6 +12,8 @@ Before installing dependencies, configure the environment variables. Copy the `.
 cp .env.example .env
 ```
 
+Additionally, update the `config.json` file in the `public` directory with the necessary configuration values.
+
 ### Installation
 To get started with the project, first install the necessary dependencies:
 
