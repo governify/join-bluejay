@@ -311,20 +311,7 @@ const JoinView = () => {
                   />
                   <Button onClick={check}>Check</Button>
                 </div>
-                <div className="mt-2 text-sm">
-                  <span>
-                    Don&apos;t have an <b>info.yml</b> file?{" "}
-                  </span>
-                  <a href="/join/wizard" className="text-blue-500 hover:underline">
-                    Create one now!
-                  </a>
-                </div>
-                <div className="mt-1 text-sm">
-                  <span>Already have a registered project? </span>
-                  <a href="/join/badge" className="text-blue-500 hover:underline">
-                    Get your own badge here!
-                  </a>
-                </div>
+
                 {result === "success" && (
                   <Alert className="mt-4 bg-green-50 border-green-200">
                     <CheckCircle className="h-4 w-4 text-green-500" />
