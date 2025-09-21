@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>info.yml validator</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const blindCourses = ['PSG2-2021', 'ISPP-2021'];
+        let courseJoinCode = '';
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            if (urlParams.get("course")) {
+                document.getElementById('noCourseMessage').style.display = 'none';
+                document.getElementById('courseNameSpan').innerHTML = urlParams.get("course");
+                document.getElementById('courseCode').value = urlParams.get("course");
+                document.getElementById('courseCode').style.display = 'none';
+                document.getElementById('btnGenerate').style.width = '100%';
+            } else {
+                document.getElementById('courseMessage').style.display = 'none';
+                loadCourses();
+            }
+        });
+
+        function loadCourses() {
+            fetch("http://localhost:5700/api/v1/scopes/development/courses")
+                .then(response => response.json())
+                .then(courses => {
+                    if (!courses.scope) throw new Error("No courses found in response");
+                    const courseCodeSelect = document.getElementById('courseCode');
+                    courses.scope.forEach(classInCourse => {
+                        if (!classInCourse.hidden) {
+                            const option = document.createElement("option");
+                            option.text = classInCourse.classId;
+                            courseCodeSelect.add(option);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error getting the courses:', error);
+                });
+        }
+
+        function fetchCourseJoinCode(courseId) {
+            console.log('Fetching course join code for ' + courseId);
+            return fetch(`http://localhost:5700/api/v1/scopes/development/${courseId}`)
+                .then(response => response.json())
+                .then(data => {
+                    courseJoinCode = data.scope.joinCode;
+                    return courseJoinCode;
+                })
+                .catch(error => {
+                    console.error('Error fetching course join code:', error);
+                });
+        }
+
+        let verifiedRepoURL = '';
+
+        // Check
+        function check() {
+            resetGeneration();
+
+            const repoURLInput = document.getElementById('repoURL');
+            let repoURL = repoURLInput.value.trim();
+            if (repoURL === '') { return; }
+
+            // Remove .git extension
+            repoURL = repoURL.replace('.git', '');
+
+            document.getElementById('result').innerHTML = '<br/>Checking...';
+
+            console.log('Checking ' + repoURL + '!!');
+
+            const data = { repoList: [repoURL] };
+
+            fetch('http://localhost:5700/api/v1/scopes/development/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    showResult(data, repoURL);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    showResult(error);
+                });
+        }
+
+        function showResult(result, repoURL) {
+            let resultHTML = '';
+            if (result.code === 200 && result.projects.length === 1) {
+                const err = result.projects[0].errors;
+                if ((err.length === 0)) {
+                    resultHTML = "<br/><strong>Yay!! That repo has a valid <span style='color: rgb(41, 126, 255)'>bluejay</span> info.yml 😊</strong><br/>";
+                    verifiedRepoURL = repoURL;
+                    document.getElementById('generationDiv').style.display = 'block';
+                } else {
+                    resultHTML = '<br/><strong>Ups!! There is a problem! 😔 If after fixing the errors it persists, wait 5 minutes before retrying again.</strong><br/>';
+
+                    resultHTML += '<br/>Error(s) found:<ul>';
+                    err.forEach((e) => {
+                        resultHTML += '<li>' + e + '</li>';
+                    });
+                    resultHTML += '</ul>';
+                }
+            } else {
+                resultHTML = '<br/>There is a problem with the validator, please contact admin';
+                console.log('Unexpected result from checker:');
+                console.log(JSON.stringify(result, null, 2));
+            }
+
+            document.getElementById('result').innerHTML = resultHTML;
+
+            return false;
+        }
+
+        // Generation
+        function generate() {
+            const userJoinCode = document.getElementById('userJoinCode').value.trim();
+            const courseCode = document.getElementById('courseCode').value;
+            if (courseCode === '' || verifiedRepoURL === '') { return; }
+
+            fetchCourseJoinCode(courseCode).then(fetchedJoinCode => {
+                if (userJoinCode !== fetchedJoinCode) {
+                    document.getElementById('generationResult').innerHTML = '<br/><strong>Wrong Join Code!</strong>';
+                    return;
+                }
+
+                document.getElementById('generationResult').innerHTML = '<br/>Generating, please wait...';
+                console.log('Generating ' + verifiedRepoURL + ' with course code ' + courseCode + '!!');
+
+                const data = { courseId: courseCode, repoList: [verifiedRepoURL] };
+
+                fetch('http://localhost:5700/api/v1/scopes/development/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        showGenerationResult(data, courseCode);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        showGenerationResult(error);
+                    });
+            });
+        }
+
+        function showGenerationResult(result, courseId) {
+            let resultHTML = '';
+            if (result.code === 200 && result.projects.length === 1) {
+                const err = result.projects[0].errors;
+                if (err) console.log(err);
+                if (!err || err.length === 0) {
+                    // Generated project
+                    const projectScope = result.projects[0].newScope;
+                    //Getting course template id
+                    console.log('Register - Fetching course template id...');
+                    fetch(`http://localhost:5700/api/v1/scopes/development/${courseId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const courseTemplateId = data.scope.templateId;
+                            //Getting template and prepare it
+                            console.log(`Register - Fetching TPA template ${courseTemplateId} ...`);
+                            fetch(`http://localhost:5400/api/v6/templates/${courseTemplateId}`)
+                                .then(response => response.text())
+                                .then(data => {
+                                    console.log('Register - TPA template obtained.');
+                                    const projectId = projectScope.projectId;
+                                    const tpa = JSON.parse(data.replace(/1010101010/g, projectId).replace(/2020202020/g, courseId));
+                                    if (!tpa.context.infrastructure) { tpa.context.infrastructure = {}; }
+                                    tpa.context.infrastructure.render = 'http://localhost:5100/render?model=http://localhost:5400/api/v6/agreements/' + tpa.id + '&view=/renders/tpa/default.html&ctrl=/renders/tpa/default.js';
+                                    // Add notifications
+                                    tpa.context.definitions.notifications = projectScope.notifications ? projectScope.notifications : {};
+                                    tpa.type = 'agreement';
+                                    delete tpa._id;
+                                    delete tpa.id;
+                                    // We order TPA to get templateId second property
+                                    const tpaOrdered = {
+                                        id: 'tpa-' + projectId,
+                                        templateId: courseTemplateId,
+                                        ...tpa
+                                    };
+
+                                    // Create TPA
+                                    fetch('http://localhost:5400/api/v6/agreements', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(tpaOrdered)
+                                    }).then(response => {
+                                        console.log('Register - Agreement created (tpa-' + projectId + ').');
+                                        const periods = { periods: [{ from: '2021-01-18T00:00:00Z', to: new Date().toISOString() }] };
+
+                                        // Start director
+                                        fetch('http://localhost:5200/api/v1/public/director/' + courseId + '.json')
+                                            .then(response => {
+                                                if (!response.ok) {
+                                                    return response.text().then(errorMsg => {
+                                                        throw new Error(errorMsg);
+                                                    });
+                                                }
+                                                return response.text();
+                                            })
+                                            .then(directorData => {
+                                                console.log('Register - Director JSON obtained.');
+                                                const directorJSON = JSON.parse(directorData);
+                                                // Run director
+                                                runDirectorTask(directorJSON, courseId, projectId);
+                                            }).catch(err => {
+                                                console.log("Error: Failed obtaining director.json computation info.\nURL:", 'http://localhost:5200/api/v1/public/director/' + courseId + '.json\n' + err)
+                                                console.log("Register - Fetching template.json instead ...");
+                                                fetch('http://localhost:5200/api/v1/public/director/template.json')
+                                                    .then(response => response.text())
+                                                    .then(directorData => {
+                                                        console.log('Template.json director obtained');
+                                                        const directorJSON = JSON.parse(directorData);
+                                                        directorJSON.interval = 3600000;
+                                                        const initDate = new Date();
+                                                        directorJSON.init = initDate.toISOString().split('.')[0] + 'Z';
+                                                        const endDate = new Date(initDate);
+                                                        endDate.setMonth(initDate.getMonth() + 4);
+                                                        directorJSON.end = endDate.toISOString().split('.')[0] + 'Z';
+                                                        fetch('http://localhost:5200/api/v1/public/director/' + courseId + '.json', {
+                                                            method: 'POST',
+                                                            headers: {
+                                                                'Content-Type': 'application/json'
+                                                            },
+                                                            body: JSON.stringify(directorJSON)
+                                                        })
+                                                            .then(response => {
+                                                                if (response.ok) {
+                                                                    console.log("Director.json file successfully created.");
+                                                                } else {
+                                                                    throw new Error("Failed to create director.json file.");
+                                                                }
+                                                            })
+                                                            .catch(err => {
+                                                                console.error("Error while posting director JSON:", err);
+                                                            });
+                                                        // Run director
+                                                        runDirectorTask(directorJSON, courseId, projectId);
+                                                    })
+                                                    .catch(err => {
+                                                        console.error("Error fetching director template.json:", err);
+                                                    });
+                                            });
+                                    }).catch((error) => {
+                                        console.error('Error:', error);
+                                    });
+                                }).catch(error => {
+                                    console.error('Error fetching tpa template  :', error);
+                                });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching course -> template id :', error);
+                        });
+
+
+                    if (blindCourses.includes(courseId)) {
+                        resultHTML = '<strong>Congrats! Your project has successfully joined Bluejay! </strong><br/>';
+                    } else {
+                        var dashboardURL = 'http://localhost:5600/dashboard/script/dashboardLoader.js?dashboardURL=http://localhost:5300/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                        resultHTML = '<strong>Congrats! Your project dashboard has been created! </strong><br/>';
+                        resultHTML += '<span>If this is an empty repo, no data will be shown at the moment. As you start working on it (with P/R, Commit, stories, etc.) the analysis will begin and you can access the dashboard by clicking on the following badge <a href="' + dashboardURL + '" target="_blank"><img src="https://img.shields.io/badge/Bluejay-Dashboard_"' + projectScope.teamId + '"-blue.svg"></img></a> (credentials: user/bluejay)</span><br/>';
+                        resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-Dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
+                    }
+                } else if (err[0] === 'The is no new changes for this project scope.') {
+                    const projectScope = result.projects[0].oldScope;
+                    if (blindCourses.includes(courseId)) {
+                        resultHTML = '<strong>Your project had already properly joined to bluejay! </strong><br/>';
+                    } else {
+                        var dashboardURL = 'http://localhost:5600/dashboard/script/dashboardLoader.js?dashboardURL=http://localhost:5300/api/v4/dashboards/tpa-' + projectScope.projectId + '/main';
+                        resultHTML = '<strong>Your project is already registered and there are no changes to your info.yml!</strong><br/>';
+                        resultHTML += '<span>If you want to access the dashboard click on the following badge <a href="' + dashboardURL + '" target="_blank"><img src="https://img.shields.io/badge/Bluejay-Dashboard_"' + projectScope.teamId + '"-blue.svg"></img></a> (credentials: user/bluejay)</span><br/>';
+                        resultHTML += "<br/><span>If you want to add the badge to your repo's README.md you can copy the following markdown:</span><br/><i>[![Bluejay Dashboard](https://img.shields.io/badge/Bluejay-Dashboard_" + projectScope.teamId + '-blue.svg)](' + dashboardURL + ')</i>';
+                    }
+                } else {
+                    resultHTML = '<br/><strong>Ups!! There is a problem! 😔</strong><br/>';
+                    resultHTML += '<br/>Error(s) found:<ul>';
+                    err.forEach((e) => {
+                        resultHTML += '<li>' + e + '</li>';
+                    });
+                    resultHTML += '</ul>';
+                }
+            } else if (result.code === 403) {
+                resultHTML = '<br/><strong>This course code does not exist 😲! Please enter a valid one.</strong>';
+                console.log("Course code doesn't exist:");
+                console.log(JSON.stringify(result, null, 2));
+            } else {
+                resultHTML = '<br/>There is a problem with the generator, please contact admin';
+                console.log('Unexpected result from generator:');
+                console.log(JSON.stringify(result, null, 2));
+            }
+
+            document.getElementById('generationResult').innerHTML = resultHTML;
+
+            return false;
+        }
+
+        function runDirectorTask(directorJSON, courseId, projectId) {
+            const directorRequest = {
+                id: 'tpa-' + projectId,
+                script: 'http://localhost:5200/api/v1/public/director/' + courseId + '.js',
+                running: true,
+                config: {
+                    agreementId: 'tpa-' + projectId
+                },
+                init: directorJSON.init,
+                end: directorJSON.end,
+                interval: directorJSON.interval
+            }
+            fetch('http://localhost:5800/api/v1/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(directorRequest)
+            })
+                .then(response => {
+                    fetch('http://localhost:5800/api/v1/tasks/' + directorRequest.id + '/run', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(directorRequest)
+                    }).then(response => {
+                        if (!response.ok) {
+                            return response.text().then(error => {
+                                throw new Error(error);
+                            });
+                        }
+                        return response.text();
+                    })
+                        .then(data => {
+                            console.log("Successfully launched first data collect task");
+                            console.log('Register - Director is set up and working.');
+                        })
+                        .catch(err => {
+                            console.error('Error during task execution:', err);
+                        });
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
+        // Aux
+        function sendclick(event, btn) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.getElementById(btn).click();
+            }
+        }
+
+        function resetGeneration() {
+            verifiedRepoURL = '';
+            document.getElementById('generationDiv').style.display = 'none';
+            document.getElementById('generationResult').innerHTML = '';
+        }
+
+        window.addEventListener('load', function () {
+            console.log('Document loaded!');
+            document.getElementById('repoURL').focus();
+        });
+    </script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+</head>
+
+<body style="font-family: 'Roboto Mono', monospace; background-color: rgb(143, 188, 255);">
+    <div style="min-height: 91vh; margin: 2%; padding: 3%; background-color: white; border: 1px solid rgb(151, 151, 151);">
+        <h1 style="width: 100%; text-align: center; padding-bottom: 10px; color: rgb(41, 126, 255);">Bluejay</h1>
+        <hr />
+        <h4 style="width: 100%; text-align: left; padding: 20px 0 10px 0;">Welcome to the join-in page!</h4>
+        <div style="margin:2%">
+            <h5 style="width: 100%; text-align: left; padding-bottom: 10px; font-size: 1.1rem;"><strong style="color: rgb(41, 126, 255);">1.</strong> Please, enter you GitHub or GitLab Repository URL containing the <a href="https://github.com/governifyauditor/goldenflow-showcase-project/blob/main/info.yml"><span style="color: rgb(41, 126, 255);">info.yml </span></a>(.yaml not supported) file in the <b>main</b> branch to check it's validity.</h5>
+            <div class="form-inline">
+                <input id="repoURL" class="form-control" style="width:89%; margin-right: 1%;" placeholder="https://github.com/governifyauditor/goldenflow-showcase-project" onkeyup="sendclick(event, 'btnCheck')">
+                <button id="btnCheck" class="btn btn-outline-info" style="width: 10%;" type="submit" onsubmit="check()" onclick="check()">Check</button>
+            </div>
+            <p style="margin: 10px;">Don't have an <b>info.yml</b> file? <a href="/wizard">Create one now!</a></p>
+            <span style="margin: 10px;">Already have a registered project? <a href="/badge">Get your own badge here!</a></span>
+
+            <div id="result" style="padding: 1% 5%;"></div>
+        </div>
+        <div style="margin:2%; display: none;" id="generationDiv">
+            <hr />
+            <h5 id="noCourseMessage" style="width: 100%; text-align: left; padding-bottom: 10px; font-size: 1.1rem;">
+                <strong style="color: rgb(41, 126, 255);">2.</strong> To register your project in a <span style="color: rgb(41, 126, 255);">course</span>, please enter the code and click on join! F.e: CS169L, testing
+            </h5>
+            <hr />
+            <h5 id="courseMessage" style="width: 100%; text-align: left; padding-bottom: 10px; font-size: 1.1rem;">
+                <strong style="color: rgb(41, 126, 255);">2.</strong> To register your project in <span style="color: rgb(41, 126, 255);" id="courseNameSpan"></span> course, click on join!
+            </h5>
+            <div class="form-inline">
+                <input id="userJoinCode" class="form-control" style="width:89%; margin-right: 1%;" placeholder="Enter Join Code" onkeyup="sendclick(event, 'btnGenerate')">
+            </div>
+            <div class="form-inline" style="margin-top: 10px;">
+                <select id="courseCode" class="form-select form-select-sm" onkeyup="sendclick(event, 'btnGenerate')" style="width:89%; margin-right: 1%;">
+                </select>
+                <button id="btnGenerate" class="btn btn-outline-success" style="width: 10%;" type="submit" onsubmit="generate()" onclick="generate()">Join</button>
+            </div>
+
+            <div id="generationResult" style="padding: 1% 5%;"></div>
+        </div>
+    </div>
+</body>
+
+</html>
