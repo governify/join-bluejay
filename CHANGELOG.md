@@ -1,3 +1,23 @@
+# [2.1.0](https://github.com/governify/join-bluejay/compare/v1.10.0...v2.1.0) (2025-09-21)
+
+
+### Bug Fixes
+
+* fixed joinCode logic & urls on index.html ([96455f8](https://github.com/governify/join-bluejay/commit/96455f86e5e8a0e2508b723009becf7e1167b410))
+* update default server port to 6001 ([e234f30](https://github.com/governify/join-bluejay/commit/e234f303696429f50ebb2b6a5604b7d7e3129e6a))
+
+
+### Features
+
+* add environment variable support in Dockerfile and update .env.example ([a57c4f6](https://github.com/governify/join-bluejay/commit/a57c4f6e3a4333cc0a1209bbc4a1ea821890cddb))
+* add MoreInfo component for additional context and fix join messages ([5a573ce](https://github.com/governify/join-bluejay/commit/5a573ce19c93a734069db2b8505fa108078efa48))
+* added new joinCode config & now templates working ([31adcbf](https://github.com/governify/join-bluejay/commit/31adcbfcc05f9198d80f57cd7bf0df0d089966b7))
+* load configuration from public/config.json and update environment variable handling ([88a094f](https://github.com/governify/join-bluejay/commit/88a094fa1b4815b207796a098b338bf5e13d7480))
+* migration to React with Vite ([9c684c4](https://github.com/governify/join-bluejay/commit/9c684c4e026394f3886797a171b4190790abf273))
+* update dependencies and add WorkInProgressView component ([3b9ac8a](https://github.com/governify/join-bluejay/commit/3b9ac8a290fe1a31bd5e7b173a8322230edda7a8))
+
+
+
 # [1.10.0](https://github.com/governify/join-bluejay/compare/v1.9.1...v1.10.0) (2024-07-05)
 
 
